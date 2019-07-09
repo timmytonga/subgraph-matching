@@ -88,11 +88,11 @@ class Equivalence:
 
     def __len__(self):
         ''' returns the number of elements in the equiv class'''
-        return len(parent_map)
+        return len(self.parent_map)
 
     def class_count(self):
         ''' return the number of unique equiv classes'''
-        return len(root_size_map)
+        return len(self.root_size_map)
 
     def classes(self) -> [{'equiv classes'}]:
         ''' returns a list of sets of equivalence classes (python doesn't allow set of sets)'''
