@@ -5,7 +5,7 @@ functions for finding data on the desghidorah.
 import os
 from glob import glob
 
-root_folder = "/Users/thiennguyen/reu-subgraph-matching/Data"
+root_folder = "/s2/scr/reu_data/darpa_maa/data/"
 
 TA1_TEAMS = ["GORDIAN", "IVYSYS", "PNNL","EXAMPLE"]
 
@@ -106,7 +106,7 @@ class NetFileGetter:
         if self.ta1_team=="PNNL" and self.version != "RW" and self.version >=5 or\
                 self.ta1_team=="GORDIAN" and self.version >= 5 or\
                 self.ta1_team=="IVYSYS" and self.version >= 8:
-            self.data_root = root_folder
+            self.data_root = "/s1/scr/reu_data2/darpa_maa/data/"
 
         self.net_dir = get_data_dir(self.data_root,
                                     ta1_team=self.ta1_team,
