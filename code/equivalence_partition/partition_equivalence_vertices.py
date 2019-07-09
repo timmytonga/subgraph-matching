@@ -4,15 +4,15 @@
     by TimNg
     Last Update: 7/8/19 (Basic Functionalities)'''
 
-from equivalence_data_structure import Equivalence
+from .equivalence_data_structure import Equivalence
 import numpy as np
 
-def permutation_relation(vertex_a, vertex_b, nodes, adj_matrix):
+def permutation_relation(vertex_a, vertex_b, adj_matrix):
     ''' nodes and adj_matrix are global variable
     We compare two vertices: a and b to see if they are equivalence
     under permutation. This can be done by checking if certain pieces
     of their values in the adj_matrix are the same (see notes)'''
-    n = len(nodes)
+    n = adj_matrix.shape[0] 
     assert vertex_a in range(0, n), \
         "permutation_relation: invalid index for vertex " + str(vertex_a)
     assert vertex_b in range(0, n), \
@@ -40,14 +40,13 @@ def permutation_relation(vertex_a, vertex_b, nodes, adj_matrix):
     # we have passed all the test if we reach here... return True now
     return True
 
-def partition_vertices(nodes: {'vertices'}, adj_matrix: '2d numpy array') \
+def partition_vertices(adj_matrix: '2d numpy array') \
     -> [{'equiv-vertices'}]:
     ''' Given a set of vertices and an adj_matrix (directed multigraph)
     we partition them in terms of the permutation relation'''
-    assert adj_matrix.shape == (len(nodes), len(nodes)), "partition_vertices: Invalid data format \
-        (see function's docstring for valid input)"
+    assert adj_matrix.shape[0] == adj_matrix.shape[1], "partition_vertices: Input matrix must be square!"
     # initialize an equivalence relation fill with nodes
-    vertices_partition = Equivalence(nodes)
+    vertices_partition = Equivalence(range(0,adj_matrix.shape[0]))
     # partition into equivalence classes
-    vertices_partition.partition(permutation_relation, nodes, adj_matrix)
+    vertices_partition.partition(permutation_relation, adj_matrix)
     return vertices_partition
