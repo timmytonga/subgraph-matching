@@ -6,11 +6,12 @@
 
 from collections import defaultdict
 
+
 class Equivalence:
-    ''' Equivalence class data structure for efficient equivalence classes
-    computation'''
-    def __init__(self, starting_set = set()):
-        ''' starting_set is a set of node to start with '''
+    """ Equivalence class data structure for efficient equivalence classes
+    computation"""
+    def __init__(self, starting_set=set()):
+        """ starting_set is a set of node to start with """
         # dictionary of parents where each key is mapped to its parent
         # start with everything maps to itself
         self.parent_map = {a: a for a in starting_set}

@@ -7,7 +7,11 @@
 	# should store in this structure? Or should query from the existing world graph 
 	An edge between two candidates in two supernodes exists iff a 
 	superedge exist in their containing supernodes as well as if there is an edge 
-	between those candidates in the world graph''' 
+	between those candidates in the world graph
+
+
+by Tim Nguyen
+Last update: 7/17/19 ''' 
 from .supernodes import Supernode 
 
 class CandidateStructure:
@@ -25,5 +29,16 @@ class CandidateStructure:
 	# heap sorts only order but how to take into account edge information.... BFS search ordering... 
 	# 	obtain neighbor list of current node -> sort and append to order  (how to get neighbors?)
 	#		 
+
+	####### QUERIES ######
+	def get_supernodes_count(self):
+		''' Return the total number of super nodes in the candidate structure. 
+		Should be the same as the number of equivalent classes '''
+		pass 
+
+	def get_template_nodes_count(self):
+		''' Return the total number of template node.
+		Should be the same as the size of the union of all nodes in the supernodes '''
+		pass
 
 
