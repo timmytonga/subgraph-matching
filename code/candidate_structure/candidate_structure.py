@@ -12,7 +12,8 @@
 
 by Tim Nguyen
 Last update: 7/17/19 ''' 
-from .supernodes import Supernode 
+from .supernodes import Supernode
+from .partial_match import PartialMatch
 
 class CandidateStructure:
 	''' Contains 	supernodes: corresponding to template's nodes (with candidates)
@@ -28,17 +29,30 @@ class CandidateStructure:
 	# matching algorithm should have some good ordering to follow candidate-edges
 	# heap sorts only order but how to take into account edge information.... BFS search ordering... 
 	# 	obtain neighbor list of current node -> sort and append to order  (how to get neighbors?)
-	#		 
+	#
 
-	####### QUERIES ######
+	# ========== METHODS ==========
+	def run_cheap_filters(self, partial_match: PartialMatch) -> "Some sort of ways to rep. candidates":
+		""" Not sure if we should modify the current structure directly and store the changes
+			somewhere for restore or if we should make a new structure entirely """
+		pass
+
+	def restore_changes(self):
+		""" Not sure what this does yet but we might need to restore some changes say by the filters """
+		pass
+
+	# ========== QUERIES ==========
 	def get_supernodes_count(self):
-		''' Return the total number of super nodes in the candidate structure. 
-		Should be the same as the number of equivalent classes '''
+		"""Return the total number of super nodes in the candidate structure.
+		Should be the same as the number of equivalent classes """
 		pass 
 
 	def get_template_nodes_count(self):
-		''' Return the total number of template node.
-		Should be the same as the size of the union of all nodes in the supernodes '''
+		"""Return the total number of template node.
+		Should be the same as the size of the union of all nodes in the supernodes"""
 		pass
 
-
+	def get_candidates(self, supernode):
+		""" Returns an iterator of candidates of a given supernode"""
+		# IMPORTANT: must use yield for iterator.... can be complicated wrt storage
+		pass
