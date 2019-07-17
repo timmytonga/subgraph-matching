@@ -63,6 +63,7 @@ class Equivalence:
         The time complexity should be n*logn (need a proof though...)
             for a divide and conquer approach ... now it's just naive implementation '''
         classes = []
+        # TODO: parallelize 
         for i in self.root_size_map:
             found = False
             for c in classes:
