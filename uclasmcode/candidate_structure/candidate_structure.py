@@ -15,7 +15,7 @@ Last update: 7/17/19 '''
 from .supernodes import Supernode
 from .partial_match import PartialMatch
 
-class CandidateStructure:
+class CandidateStructure(object):
 	''' Contains 	supernodes: corresponding to template's nodes (with candidates)
 					superedges (between super nodes): corresponding to template's edges
 					candidate-edges: between two candidates in two supernodes

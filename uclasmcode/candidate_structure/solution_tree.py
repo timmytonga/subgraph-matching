@@ -27,15 +27,22 @@ from .partial_match import PartialMatch
 from anytree import Node, RenderTree 		# we use the anytree library for tree
 
 
-class SolutionTree:
+class SolutionTree(object):
 	""" Solution tree contains a tree representation of solutions to the subgraph isomorphism problem
 	This class also provides queries to obtain other information about the solution space of related problems
 	"""
 	def __init__(self, ordering=None):
+		""" ordering specifies an ordering of the template nodes in form of a list
+		ideally should be to minimize the width of the tree """
 		self.root = Node("root") 	# this is the main tree
+		self.num_isomorphisms = 0 	# counter used to with add
+		# the dictionary below stores the nodes at the level matching the ordering
+		self.template_candidate_dict = {i: set() for i in ordering}
+		self.template_node_ordering = ordering
+		self.num_tmplt_nodes = len(self.template_node_ordering)
 
 	def __str__(self):
-		return "test"
+		return str(self.root)
 
 	# ###### QUERIES #########
 	def print_tree(self):
@@ -45,7 +52,7 @@ class SolutionTree:
 		pass
 
 	def get_isomorphisms_count(self):
-		pass
+		return self.num_isomorphisms
 
 	def get_signal_nodes(self):
 		pass
@@ -56,4 +63,9 @@ class SolutionTree:
 	# ###### METHODS #########
 	def add_solution(self, matching: PartialMatch):
 		""" This should add the matching to the main solution tree"""
-		pass
+		assert len(matching) == self.num_tmplt_nodes, "Must have enough matches"
+		# increment the counter appropriately
+		# permutation for equiv classes should be taken into account
+		for match in matching:
+			self.num_isomorphisms += 1
+		# traverse the tree and add appropriate nodes

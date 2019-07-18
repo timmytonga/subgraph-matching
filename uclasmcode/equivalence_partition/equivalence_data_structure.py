@@ -7,7 +7,7 @@
 from collections import defaultdict
 
 
-class Equivalence:
+class Equivalence(object):
     """ Equivalence class data structure for efficient equivalence classes
     computation"""
     def __init__(self, starting_set=set()):

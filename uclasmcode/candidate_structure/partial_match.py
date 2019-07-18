@@ -5,12 +5,12 @@ PartialMatch class: Data structure for matching algorithm to modify, update, res
 from .supernodes import Supernode
 
 
-class PartialMatch:
+class PartialMatch(object):
     """ This data structure stores the matching between template nodes and world nodes
      It provides utilities like:
         - rm_last_match (for the DFS tree to minimize space)
-        - rm_node (to remov
-        - get_matched_dictionary (returns a dictionary of Supernode and matched world node)
+        - rm_match      (for removing a match)
+        - get_matches   (returns a dictionary of Supernode and matched world node)
         - add_match     (add a new match and keeps track of the order of adding) """
 
     def __init__(self):
@@ -21,7 +21,8 @@ class PartialMatch:
 
     # ========== METHODS ===========
     def rm_last_match(self):
-        pass
+        """ pop the last match from the stack and returns it """
+        return self.matches.pop(self.node_stack.pop())
 
     def rm_match(self, name_of_node: Supernode):
         """ Given a supernode remove it from the matches
@@ -30,13 +31,16 @@ class PartialMatch:
                                             been matched. "
         self.matches.pop(name_of_node)
 
-    def add_match(self, new_match: (Supernode, "world node")):
+    def add_match(self, new_match: (Supernode, "set of world nodes")):
         """ add the new_match to the matches. this function does not check for constraint but rather blindly adds it
         to the matches. It is up to the user to check before adding """
-        pass
+        assert new_match[0] not in self.matches, "PartialMatch.add_match: Trying to add an already added node"
+        # push the new matches onto the stack
+        self.node_stack.append(new_match[0])
+        self.matches[new_match[0]] = new_match[1]
 
     # =========== QUERIES ==========
-    def get_matched_dictionary(self):
+    def get_matches(self):
         return self.matches
 
     def __str__(self):

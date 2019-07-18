@@ -32,12 +32,21 @@ from .candidate_structure import CandidateStructure
 from .partial_match import PartialMatch
 from . import match_subgraph_utils
 
-solution = SolutionTree()   # to store solutions
+
+solution = None   # to store solutions
+
+
+def initialize_solution_tree(cs: CandidateStructure) -> None:
+	""" Given a cs, find a good ordering of the template nodes and initialize the solution tree"""
+	global solution
+	good_ordering = match_subgraph_utils.find_good_ordering_template(cs)
+	solution = SolutionTree(good_ordering)
 
 
 def match_subgraph(cs: CandidateStructure, pm: PartialMatch): # TODO: Check if below guarantees all iso.
 	""" pm: dictionary of supernode and matched nodes for partial matches
 		Require a solution tree to be initialized as a global variable with name solution"""
+	global solution
 	# BASE CASE: if pm has enough matched nodes
 	if len(pm) == cs.get_template_nodes_count():
 		# this means we have a matching
@@ -68,7 +77,7 @@ def match_subgraph(cs: CandidateStructure, pm: PartialMatch): # TODO: Check if b
 	# if the above run correctly, we should have already explored all the branches below given a partial match
 	# we return to get back to the top level, but before doing so, we must restore our data structure.
 	pm.rm_last_match()
-	cs.restore_changes() # not sure which one we modify <- might be needed since we could've modified a lot
+	cs.restore_changes() 	# not sure which one we modify <- might be needed since we could've modified a lot
 	return
 
 
