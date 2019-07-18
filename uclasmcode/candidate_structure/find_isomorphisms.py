@@ -30,7 +30,7 @@ Recursion step:
 from .solution_tree import SolutionTree
 from .candidate_structure import CandidateStructure
 from .partial_match import PartialMatch
-import match_subgraph_utils
+from . import match_subgraph_utils
 
 solution = SolutionTree()   # to store solutions
 

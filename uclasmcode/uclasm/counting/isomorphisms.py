@@ -54,7 +54,7 @@ def count_isomorphisms(tmplt, world, *, candidates=None, verbose=True):
     counts the number of assignments between nodes.
 
     if the set of unspecified template nodes is too large or too densely
-    connected, this code may never finish.
+    connected, this uclasmcode may never finish.
     """
 
     if candidates is None:

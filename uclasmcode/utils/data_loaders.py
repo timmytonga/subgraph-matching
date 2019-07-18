@@ -454,7 +454,7 @@ def get_str_alignment(alignment, alignment_file, channels=range(5)):
             alignment[(website, channel)] = new_id
     return alignment
 
-# This code uses a feature of Python default function argument values
+# This uclasmcode uses a feature of Python default function argument values
 # When a default argument is set that is a reference, all functions called
 # with the default will default to the same reference, and thus the same object
 def align_edge_str(src, dst, channel, alignment_file, alignment={}):
@@ -554,7 +554,7 @@ def get_str_alignment_v7(alignment, alignment_file, channels=range(11)):
     #         alignment[(website, channel)] = new_id
     return alignment
 
-# This code uses a feature of Python default function argument values
+# This uclasmcode uses a feature of Python default function argument values
 # When a default argument is set that is a reference, all functions called
 # with the default will default to the same reference, and thus the same object
 def align_edge_str_v7(src, dst, channel, alignment_file, alignment={}):

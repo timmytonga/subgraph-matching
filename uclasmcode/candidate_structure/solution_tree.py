@@ -34,6 +34,9 @@ class SolutionTree:
 	def __init__(self, ordering=None):
 		self.root = Node("root") 	# this is the main tree
 
+	def __str__(self):
+		return "test"
+
 	# ###### QUERIES #########
 	def print_tree(self):
 		pass
