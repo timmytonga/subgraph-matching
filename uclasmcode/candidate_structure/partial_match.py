@@ -14,6 +14,7 @@ class PartialMatch(object):
         - add_match     (add a new match and keeps track of the order of adding) """
 
     def __init__(self):
+        """ matches is for debug purposes? """
         # dictionary of Supernode to a set of matched nodes of same size as supernode
         # #Note that __hash__ is defined in Supernode
         self.matches = {}
@@ -31,24 +32,45 @@ class PartialMatch(object):
                                             been matched. "
         self.matches.pop(name_of_node)
 
-    def add_match(self, new_match: (Supernode, "set of world nodes")):
-        """ add the new_match to the matches. this function does not check for constraint but rather blindly adds it
-        to the matches. It is up to the user to check before adding """
-        assert new_match[0] not in self.matches, "PartialMatch.add_match: Trying to add an already added node"
+    def add_match(self, supernode, candidate_node):
+        """ add the new_match to the matches. """
+        assert supernode not in self.matches, "PartialMatch.add_match: Trying to add an already added node"
+        assert len(supernode) == len(candidate_node), "Invalid matching: matching must be a set of equal len"
         # push the new matches onto the stack
-        self.node_stack.append(new_match[0])
-        self.matches[new_match[0]] = new_match[1]
+        self.node_stack.append(supernode)
+        self.matches[supernode] = candidate_node
 
     # =========== QUERIES ==========
-    def get_matches(self):
+    def get_matches(self) -> {Supernode: {'matched nodes'}}:
+        """ Returns a dictionary of matches of this partial match"""
         return self.matches
 
-    def __str__(self):
-        """ Gives the string of the matched dictionary """
-        return str(self.matches)
+    def print_match_stack(self):
+        """ Return a nicely formatted match stack for debugging mainly """
+        return str([str(i) for i in self.node_stack])
 
-    def is_joinable(self, cs, new_match: (Supernode, "world node")) -> bool:
+    def is_joinable(self, cs, supernode: Supernode, candidate_node: {'world_nodes'}) -> bool:
         """ Given a cs structure and a new_match (tuple of Supernode and world node,
         returns a bool if the new match satisfies the homomorphism and the alldifferent constraints"""
         pass
 
+    # === utils ====
+    def __str__(self):
+        """ Gives the string of the matched dictionary """
+        return str([(str(u), str(v)) for u, v in self.matches.items()])
+
+    def __repr__(self):
+        """ Gives some useful info for debugging """
+        result = self.print_match_stack()
+        result += "\nMatches dictionary: {}".format(
+            str({str(u): str(v) for u, v in self.matches.items()}))
+        return result
+
+    def __eq__(self, other):    # mainly for debugging
+        return self.matches == other.matches and self.node_stack == other.node_stack
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __len__(self):
+        return len(self.matches)

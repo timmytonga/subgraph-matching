@@ -24,28 +24,43 @@ Methods:
 
 from .supernodes import Supernode
 from .partial_match import PartialMatch
-from anytree import Node, RenderTree 		# we use the anytree library for tree
+from anytree import Node, RenderTree, DoubleStyle 		# we use the anytree library for tree
+import math 		# for factorial
+
+
+class SolutionNode(Node):
+	""" A custome node for this problem """
+	def __init__(self, sn: Supernode = None, parent=None, name=None):
+		self.supernode = sn
+		if name == None:
+			name = str(sn)
+		Node.__init__(self, name, parent, supernode=sn)
+
+	def __hash__(self):
+		return hash(self.supernode)
+
+	def same_super_node(self, other) -> bool:
+		""" Returns whether two SolutionNode has the same supernode """
+		# what if other.supernode is not good...
+		return self.supernode == other.supernode
 
 
 class SolutionTree(object):
 	""" Solution tree contains a tree representation of solutions to the subgraph isomorphism problem
 	This class also provides queries to obtain other information about the solution space of related problems
 	"""
-	def __init__(self, ordering=None):
+	def __init__(self, ordering: [Supernode]):
 		""" ordering specifies an ordering of the template nodes in form of a list
 		ideally should be to minimize the width of the tree """
-		self.root = Node("root") 	# this is the main tree
+		self.root = SolutionNode(name="root") 	# this is the main tree
 		self.num_isomorphisms = 0 	# counter used to with add
 		# the dictionary below stores the nodes at the level matching the ordering
 		self.template_candidate_dict = {i: set() for i in ordering}
 		self.template_node_ordering = ordering
 		self.num_tmplt_nodes = len(self.template_node_ordering)
 
-	def __str__(self):
-		return str(self.root)
-
 	# ###### QUERIES #########
-	def print_tree(self):
+	def print_tree(self):  # nice fancy function from library
 		pass
 
 	def iterate_isomorphisms(self):
@@ -55,17 +70,71 @@ class SolutionTree(object):
 		return self.num_isomorphisms
 
 	def get_signal_nodes(self):
-		pass
+		""" returns a set of signal nodes """
+		return set.union(*list(self.template_candidate_dict.values()))
 
 	def get_min_complete_cand_set(self):
-		pass
+		""" Returns a list of sets"""
+		return list(self.template_candidate_dict.values())
 
 	# ###### METHODS #########
-	def add_solution(self, matching: PartialMatch):
+	def add_solution(self, matching: PartialMatch) -> None:
 		""" This should add the matching to the main solution tree"""
 		assert len(matching) == self.num_tmplt_nodes, "Must have enough matches"
-		# increment the counter appropriately
-		# permutation for equiv classes should be taken into account
-		for match in matching:
-			self.num_isomorphisms += 1
-		# traverse the tree and add appropriate nodes
+		match_dict = matching.get_matches()
+		# first we update the counter
+		self._increase_counter(match_dict)
+		# now we add the solution to the tree
+		self._append_to_tree(match_dict)
+
+	# # PRIVATE
+	def _append_to_tree(self, match_dict: {Supernode: set}) -> None:
+		""" Given a match from template nodes to set of world node
+		Append it to tree and add appropriate nodes to dictionary"""
+		prev_node = self.root  # we start at the root
+		# then we traverse the tree in the same order we were given with
+		for i in range(self.num_tmplt_nodes):  # iterate over all tmplt nodes
+			curr_tmplt_node = self.template_node_ordering[i]  # the current node
+			match = Supernode(match_dict[curr_tmplt_node])  # we change the matching set to a supernode
+			# given the hash is correct, we should add each match only once
+			self.template_candidate_dict[curr_tmplt_node].add(match)
+			# now we check if there's a child already on this path
+			child_flag = False
+			for child in prev_node.children:  # child is a SolutionNode(match)
+				if match == child.supernode:  # if it exists already
+					child_flag = True
+					prev_node = child  # we want to keep the same child for next layer
+					break
+			if not child_flag:  # if there's no child, create one and set it as that for next run
+				prev_node = SolutionNode(match, parent=prev_node)
+
+	def _increase_counter(self, match_dict: {Supernode: set}) -> None:
+		""" Given a matching in a form of dictionary, we increase the isomorphism count appropriately"""
+		for sn, matches in match_dict.items():
+			# a match contributes all the permutation to a solution. This number can be huge
+			# Python supports large integers naturally
+			self.num_isomorphisms += math.factorial(len(matches))
+
+	# ### UTILITIES
+
+	def __str__(self):
+		"""
+		:return: a nicely printed tree format of the solution tree
+		"""
+		result = str([str(i) for i in self.template_node_ordering]) + "\n"
+		for pre, _, node in RenderTree(self.root, style=DoubleStyle):
+			result += ("%s%s\n" % (pre, node.name))
+		return result
+
+	def __repr__(self):
+		""" Returns the num_isomorphisms, template_candidate_dict, and
+		template_node_ordering"""
+		result = "Num isomorphisms: {}".format(self.num_isomorphisms)
+		result += "\nTemplate node ordering: {}".format(str([i for i in self.template_node_ordering]))
+		result += "\nTemplate candidate dictionary: {}".format(
+			str({str(u): str(v) for u, v in self.template_candidate_dict.items()}))
+		return result
+
+	def __len__(self):
+		""" Returns the total number of isomorphisms i.e. leaf nodes"""
+		return self.num_isomorphisms
