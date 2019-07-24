@@ -32,7 +32,7 @@ class SolutionNode(Node):
 	""" A custome node for this problem """
 	def __init__(self, sn: Supernode = None, parent=None, name=None):
 		self.supernode = sn
-		if name == None:
+		if name is None:
 			name = str(sn)
 		Node.__init__(self, name, parent, supernode=sn)
 

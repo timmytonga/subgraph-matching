@@ -6,13 +6,12 @@ Utilities functions for match_subgraph function. Includes:
 
 """
 
-from .candidate_structure import CandidateStructure
+from .candidate_structure import CandidateStructure, SuperTemplateNode
 from .partial_match import PartialMatch
 from .supernodes import Supernode
 
 
-
-def pick_next_candidate(candidateStruct: CandidateStructure, partial_match: PartialMatch) -> Supernode:
+def pick_next_candidate(candidateStruct: CandidateStructure, partial_match: PartialMatch) -> SuperTemplateNode:
     """ The order changes each match.... """
     pass
 
@@ -23,9 +22,9 @@ def find_good_ordering_template(cs: CandidateStructure) -> [Supernode]:
     pass
 
 
-def rank_template_node(cs: CandidateStructure, sn: Supernode) -> int:
+def rank_template_node(cs: CandidateStructure, sn: SuperTemplateNode) -> int:
     """ Given a candidate structure and a supernode, returns a ranking integer
     Formula: degree/#candidates """
-    pass
+    return cs.get_candidates_count(sn)
 
 

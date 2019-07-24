@@ -1,7 +1,8 @@
-""" Simple utilities used for debugging, logging, testing, etc. """
+""" Simple utilities used for debugging, logging, profiling, testing, etc. """
 
 import logging
 import datetime
+import profile
 
 
 # setup logger
