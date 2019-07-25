@@ -11,6 +11,7 @@ uclasmcode/candidate_structure/candidate_structure.py
 uclasmcode/candidate_structure/find_isomorphisms.py
 uclasmcode/candidate_structure/match_subgraph_utils.py
 uclasmcode/candidate_structure/partial_match.py
+uclasmcode/candidate_structure/simple_utils.py
 uclasmcode/candidate_structure/solution_tree.py
 uclasmcode/candidate_structure/supernodes.py
 uclasmcode/equivalence_partition/__init__.py

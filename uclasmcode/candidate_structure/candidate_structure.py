@@ -14,8 +14,7 @@ by Tim Nguyen
 Last update: 7/17/19 """
 
 from .supernodes import Supernode
-from .partial_match import PartialMatch
-from uclasm.utils.data_structures import Graph
+from uclasmcode.uclasm.utils.data_structures import Graph
 import numpy as np
 from typing import Iterable
 
@@ -67,7 +66,7 @@ class CandidateStructure(object):
 	# 	obtain neighbor list of current node -> sort and append to order  (how to get neighbors?)
 
 	# ========== METHODS ==========
-	def run_cheap_filters(self, partial_match: PartialMatch) -> "Some sort of ways to rep. candidates":
+	def run_cheap_filters(self) -> "Some sort of ways to rep. candidates":
 		""" Not sure if we should modify the current structure directly and store the changes
 			somewhere for restore or if we should make a new structure entirely """
 		pass
@@ -101,7 +100,7 @@ class CandidateStructure(object):
 		Should be the same as the size of the union of all nodes in the supernodes"""
 		return self.tmplt_graph.n_nodes
 
-	def get_candidates(self, supernode) -> Iterable[{int}]:
+	def get_candidates(self, supernode):
 		""" Returns an iterator of candidates of a given supernode
 		Iterates through subsets of nodes for supernodes rather than permutations
 		Yields singleton for trivial supernodes """
