@@ -8,6 +8,8 @@ class Supernode(object):
     for other data structure. Special is that it sorts the equiv_class
     into a tuple for hashing and comparing if we store supernodes in a dictionary/set for example"""
 
+    channels = []  # class attribute: a list of channels. Initialized in main
+
     def __init__(self, equiv_class: list or set or tuple):
         """ Note that equiv_class should be either a set, list or tuple """
         try:

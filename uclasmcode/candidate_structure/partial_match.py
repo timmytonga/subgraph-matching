@@ -4,7 +4,7 @@ PartialMatch class: Data structure for matching algorithm to modify, update, res
 
 from .supernodes import Supernode
 from .candidate_structure import CandidateStructure, SuperTemplateNode
-
+from .simple_utils import print_debug
 
 class PartialMatch(object):
     """ This data structure stores the matching between template nodes and world nodes
@@ -20,6 +20,7 @@ class PartialMatch(object):
         # #Note that __hash__ is defined in Supernode
         self.matches = {}  # {SuperTemplateNode: Supernode}
         self.node_stack = []
+        self.already_matched_world_nodes = set()  # for checking alldiff
 
     # ========== METHODS ===========
     def rm_last_match(self) -> (SuperTemplateNode, Supernode):
@@ -36,10 +37,12 @@ class PartialMatch(object):
     def add_match(self, supernode: SuperTemplateNode, candidate_node: Supernode):
         """ add the new_match to the matches. """
         assert supernode not in self.matches, "PartialMatch.add_match: Trying to add an already added node"
+        print_debug("supernode = ", supernode.get_vertices(), ". cand_node= ", candidate_node.get_vertices())
         assert len(supernode) == len(candidate_node), "Invalid matching: matching must be a set of equal len"
         # push the new matches onto the stack
         self.node_stack.append(supernode)
         self.matches[supernode] = candidate_node
+        self.already_matched_world_nodes.update(candidate_node.get_vertices())
 
     # =========== QUERIES ==========
     def get_matches(self) -> {SuperTemplateNode: {Supernode}}:
@@ -53,15 +56,23 @@ class PartialMatch(object):
     def is_joinable(
             self, cs: CandidateStructure, supernode: SuperTemplateNode,
             candidate_node: Supernode) -> bool:
-        """ Given a cs structure and a new_match (tuple of Supernode and world node,
-        returns a bool if the new match satisfies the homomorphism and the alldifferent constraints"""
-        assert supernode not in self.matches, "Trying to join "
-        if candidate_node in self.matches.values():  # first check for alldiff constraint
+        """ Given a cs structure and a new_match (supernode and candidate_node),
+        returns a bool if the new match satisfies isjoinable constraints"""
+        # first assure that we are adding a new supernode
+        assert supernode not in self.matches, \
+            "PartialMatch.is_joinable: Trying to join an existing match"
+        assert len(candidate_node) == len(supernode), \
+            "PartialMatch.is_joinable: Trying to join a candidate_node of different length"
+
+        if set(candidate_node.vertices) & self.already_matched_world_nodes:
+            # if the intersection is non-trivial
             return False
-        # TODO
-        for already_matched in self.matches:
-            for channel in cs.tmplt_graph.channels:
-                pass
+
+        # check the clique condition
+        if not cs.supernode_clique_and_cand_node_clique(supernode, candidate_node):
+            return False
+
+        # check the homomorphism condition
         return True
 
     # === utils ====

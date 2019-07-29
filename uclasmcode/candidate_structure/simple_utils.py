@@ -22,7 +22,7 @@ logger.addHandler(fh)
 # set the logging level here
 logger.setLevel(logging.DEBUG)
 # for print message
-DEBUG = False  # set this flag True to toggle DEBUG
+DEBUG = True  # set this flag True to toggle DEBUG
 VERBOSE = True  # set the flag to True for verbose
 
 
@@ -32,11 +32,11 @@ def get_now():
 
 
 # ## Trivial utils
-def print_debug(msg: str):
+def print_debug(*msg):
     """ Logging and stuff """
-    logger.debug(msg)
+    # logger.debug(*msg)
     if DEBUG:
-        print(msg)
+        print(*msg)
 
 
 def print_info(msg: str):
