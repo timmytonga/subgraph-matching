@@ -1,3 +1,5 @@
+import pytest
+
 from uclasmcode import equivalence_partition
 from uclasmcode import uclasm
 from uclasmcode.candidate_structure.candidate_structure import *
@@ -24,7 +26,7 @@ equiv_classes1 = equivalence_partition.partition_multichannel(tmplt1.ch_to_adj)
 cs1 = CandidateStructure(tmplt1, world1, candidates1, equiv_classes1)
 
 
-def test_isjoinable():
+def test_isjoinable1():
     # need to build partial match and test joinable
     pm = PartialMatch()
     pm2 = PartialMatch()
@@ -36,5 +38,20 @@ def test_isjoinable():
     assert is_joinable(pm, cs, snA, mA)
     pm.add_match(snA, mA)
     assert is_joinable(pm, cs, snC, mC)
+    assert not is_joinable(pm, cs, snC, mF)
+    with pytest.raises(AssertionError):
+        assert not is_joinable(pm, cs, snA, mC)
     pm.add_match(snC, mC)
+
     assert not is_joinable(pm2, cs, snA, mC)
+    assert not is_joinable(pm2, cs, snA, mF)
+    assert is_joinable(pm2, cs, snC, mC)
+    pm2.add_match(snC, mC)
+    assert is_joinable(pm2, cs, snA, mA)
+    with pytest.raises(AssertionError):
+        assert not is_joinable(pm, cs, snC, mF)
+    assert not is_joinable(pm, cs, snA, mC)
+    pm2.add_match(snA, mA)
+
+
+

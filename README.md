@@ -1,1 +1,1 @@
-First commit
+To get data running, modify "self.data_root" in line 117 in uclasmcode/utils/data_locations.py

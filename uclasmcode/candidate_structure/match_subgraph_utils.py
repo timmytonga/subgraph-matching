@@ -14,7 +14,7 @@ def is_joinable(
         candidate_node: Supernode) -> bool:
     """ Given a cs structure and a new_match (supernode and candidate_node),
     returns a bool if the new match satisfies isjoinable constraints"""
-    # first assure that we are adding a new supernode
+    # first assure that we are adding a new supernode (assertion because code is not supposed to call)
     assert supernode not in pm.matches, \
         "PartialMatch.is_joinable: Trying to join an existing match"
     assert len(candidate_node) == len(supernode), \
