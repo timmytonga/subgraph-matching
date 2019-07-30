@@ -28,7 +28,3 @@ def test_create():
     four_match.add_match(SuperTemplateNode(equiv_classes[4]),
                          Supernode(new_match[4]))
     assert four_match == create_partial_match(5)
-
-
-def test_isjoinable():
-    pass
