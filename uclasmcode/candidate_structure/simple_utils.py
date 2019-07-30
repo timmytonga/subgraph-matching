@@ -30,17 +30,17 @@ def get_now():
 
 
 # ## Trivial utils
-def print_debug(*msg):
+def print_debug(msg):
     """ Logging and stuff """
-    # logger.debug(*msg)
+    # logger.debug(msg)
     if DEBUG:
-        print(*msg)
+        print("DEBUG", msg)
 
 
 def print_info(msg: str):
     logger.info(msg)
     if VERBOSE:
-        print("UPDATE: ", msg)
+        print("UPDATE:", msg)
 
 
 def get_dict_str(d: dict) -> str:

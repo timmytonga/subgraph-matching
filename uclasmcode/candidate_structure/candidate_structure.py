@@ -17,6 +17,7 @@ import numpy as np
 
 from uclasmcode.equivalence_partition.equivalence_data_structure import Equivalence
 from uclasmcode.uclasm.utils.data_structures import Graph
+from .simple_utils import print_debug
 from .supernodes import Supernode
 
 
@@ -136,17 +137,35 @@ class CandidateStructure(object):
 				result.add(self.get_supernode_by_idx(pin[1]))
 		return result
 
-	def has_cand_edge(self, t1: Supernode, t2: Supernode, channel: str) -> bool:
-		""" Input: CandidateStructure.has_edge( (t_i,u), (t_j,v) )
-		Output: Returns True if (t_i, t_j) not in E(T) or
-							if (t_i, t_j) in E(T) and (u,v) in E(W)
-				Returns False if (t_i, t_j) in E(T) and (u,v) not in E(W)"""
-		pass
+	def has_cand_edge(
+			self, m1: (SuperTemplateNode, Supernode), m2: (SuperTemplateNode, Supernode),
+			channel: str) -> bool:
+		""" Given two matches, check if the matching cand_nodes have candidate edge
+		Return a bool specifying if there is a candidate edge from t1 to t2
+		"""
+		t1: SuperTemplateNode = m1[0]
+		c1: Supernode = m1[1]
+		t2: SuperTemplateNode = m2[0]
+		c2: Supernode = m2[1]
+		if len(set(c1.vertices) & set(c2.vertices)) > 0:  # cannot have intersecting nodes!
+			print_debug(f"CandidateStructure.has_cand_edge: False because {str(c1)} and {str(c2)} has intersecting nodes.")
+			return False
+		multiplicity_of_super_edge = self.get_superedge_multiplicity(t1, t2, channel)
+		if multiplicity_of_super_edge == 0:
+			print_debug(f"has_cand_edge: False because no superedge between {str(t1)} and {str(t2)}.")
+			return False
+		# check all edges in the world graph
+		world_matrix = self.world_graph.ch_to_adj[channel]
+		connection_mat = world_matrix[np.ix_(c1.get_vertices(), c2.get_vertices())]
+		if not np.all((connection_mat.A >= multiplicity_of_super_edge)):
+			# each connection from c1 to c2 must be greater than or equals to the multiplicity super edge
+			return False
+		return True  # pass all checks means True
 
-	def has_super_edge(self, t1: SuperTemplateNode, t2: SuperTemplateNode, channel: str or int) -> bool:
+	def get_superedge_multiplicity(self, t1: SuperTemplateNode, t2: SuperTemplateNode, channel: str) -> int:
 		""" Returns whether two SuperTemplateNode has an edge in a specific channel in the template graph
 		O(1) """
-		return self.tmplt_graph.ch_to_adj[channel][t1.get_root(), t2.get_root()] > 0
+		return self.tmplt_graph.ch_to_adj[channel][t1.get_root(), t2.get_root()]
 
 	def get_supernodes_count(self):
 		"""Return the total number of super nodes in the candidate structure.

@@ -2,8 +2,6 @@
 Utilities functions for match_subgraph function. Includes:
     - pick_next_candidate
     - is_joinable
-    -
-
 """
 
 from .candidate_structure import CandidateStructure, SuperTemplateNode
@@ -40,10 +38,12 @@ def is_joinable(
             if onbr in pm.matches}
         # for each neighbor, we must have a candidate edge between the two cand nodes
         for inbr in matched_incoming_nbr:
-            if not cs.has_cand_edge(pm.matches[inbr], candidate_node, channel):
+            if not cs.has_cand_edge(  # the order matters here because direction
+                    (inbr, pm.matches[inbr]), (supernode, candidate_node), channel):
                 return False
         for onbr in matched_outgoing_nbr:
-            if not cs.has_cand_edge(candidate_node, pm.matches[onbr], channel):
+            if not cs.has_cand_edge(
+                    (supernode, candidate_node), (onbr, pm.matches[onbr]), channel):
                 return False
     return True
 
@@ -63,5 +63,3 @@ def rank_template_node(cs: CandidateStructure, sn: SuperTemplateNode) -> int:
     """ Given a candidate structure and a supernode, returns a ranking integer
     Formula: degree/#candidates """
     return cs.get_candidates_count(sn)
-
-
