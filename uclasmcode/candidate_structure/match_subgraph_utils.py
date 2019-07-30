@@ -11,7 +11,44 @@ from .partial_match import PartialMatch
 from .supernodes import Supernode
 
 
-def pick_next_candidate(candidateStruct: CandidateStructure, partial_match: PartialMatch) -> SuperTemplateNode:
+def is_joinable(
+        pm: PartialMatch, cs: CandidateStructure, supernode: SuperTemplateNode,
+        candidate_node: Supernode) -> bool:
+    """ Given a cs structure and a new_match (supernode and candidate_node),
+    returns a bool if the new match satisfies isjoinable constraints"""
+    # first assure that we are adding a new supernode
+    assert supernode not in pm.matches, \
+        "PartialMatch.is_joinable: Trying to join an existing match"
+    assert len(candidate_node) == len(supernode), \
+        "PartialMatch.is_joinable: Trying to join a candidate_node of different length"
+
+    # if the intersection is non-trivial i.e. does not satisfy the alldiff constraint
+    if set(candidate_node.vertices) & pm.already_matched_world_nodes:
+        return False
+
+    # check the clique condition
+    if not cs.supernode_clique_and_cand_node_clique(supernode, candidate_node):
+        return False
+
+    # check the homomorphism condition
+    for channel in cs.channels:
+        matched_incoming_nbr = {  # set of incoming nbr that's already matched
+            inbr for inbr in cs.get_incoming_neighbors(supernode, channel) \
+            if inbr in pm.matches}
+        matched_outgoing_nbr = {  # outgoing
+            onbr for onbr in cs.get_outgoing_neighbors(supernode, channel) \
+            if onbr in pm.matches}
+        # for each neighbor, we must have a candidate edge between the two cand nodes
+        for inbr in matched_incoming_nbr:
+            if not cs.has_cand_edge(pm.matches[inbr], candidate_node, channel):
+                return False
+        for onbr in matched_outgoing_nbr:
+            if not cs.has_cand_edge(candidate_node, pm.matches[onbr], channel):
+                return False
+    return True
+
+
+def pick_next_candidate(cs: CandidateStructure, pm: PartialMatch) -> SuperTemplateNode:
     """ The order changes each match.... """
     pass
 

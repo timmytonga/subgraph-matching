@@ -2,9 +2,10 @@
 PartialMatch class: Data structure for matching algorithm to modify, update, restore partial matches """
 
 
+from .candidate_structure import SuperTemplateNode
+from .simple_utils import print_info
 from .supernodes import Supernode
-from .candidate_structure import CandidateStructure, SuperTemplateNode
-from .simple_utils import print_debug
+
 
 class PartialMatch(object):
     """ This data structure stores the matching between template nodes and world nodes
@@ -37,7 +38,7 @@ class PartialMatch(object):
     def add_match(self, supernode: SuperTemplateNode, candidate_node: Supernode):
         """ add the new_match to the matches. """
         assert supernode not in self.matches, "PartialMatch.add_match: Trying to add an already added node"
-        print_debug("supernode = ", supernode.get_vertices(), ". cand_node= ", candidate_node.get_vertices())
+        print_info(f"Adding ({str(supernode)},{str(candidate_node)}) to {str(self)}\n")
         assert len(supernode) == len(candidate_node), "Invalid matching: matching must be a set of equal len"
         # push the new matches onto the stack
         self.node_stack.append(supernode)
@@ -52,28 +53,6 @@ class PartialMatch(object):
     def print_match_stack(self) -> str:
         """ Return a nicely formatted match stack for debugging mainly """
         return str([str(i) for i in self.node_stack])
-
-    def is_joinable(
-            self, cs: CandidateStructure, supernode: SuperTemplateNode,
-            candidate_node: Supernode) -> bool:
-        """ Given a cs structure and a new_match (supernode and candidate_node),
-        returns a bool if the new match satisfies isjoinable constraints"""
-        # first assure that we are adding a new supernode
-        assert supernode not in self.matches, \
-            "PartialMatch.is_joinable: Trying to join an existing match"
-        assert len(candidate_node) == len(supernode), \
-            "PartialMatch.is_joinable: Trying to join a candidate_node of different length"
-
-        if set(candidate_node.vertices) & self.already_matched_world_nodes:
-            # if the intersection is non-trivial
-            return False
-
-        # check the clique condition
-        if not cs.supernode_clique_and_cand_node_clique(supernode, candidate_node):
-            return False
-
-        # check the homomorphism condition
-        return True
 
     # === utils ====
     def __str__(self):

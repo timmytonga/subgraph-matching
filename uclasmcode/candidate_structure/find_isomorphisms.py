@@ -27,10 +27,10 @@ Recursion step:
 
 """
 
-from .solution_tree import SolutionTree
+from . import match_subgraph_utils
 from .candidate_structure import CandidateStructure
 from .partial_match import PartialMatch
-from . import match_subgraph_utils
+from .solution_tree import SolutionTree
 
 NUM_THREADS = 1
 
@@ -66,7 +66,7 @@ def match_subgraph(cs: CandidateStructure, pm: PartialMatch, solution: SolutionT
 		# cand can be a singleton or a larger subset depending on the size of the supernode.
 		# get_candidates in cs will take care of either case and return an appropriate iterator
 		# this iterator guarantees we do not
-		if pm.is_joinable(cs, supernode=next_supernode, candidate_node=cand): 	# check
+		if match_subgraph_utils.is_joinable(pm, cs, supernode=next_supernode, candidate_node=cand):  # check
 			# if we can join, we add it to the partial match and recurse until we have a full match
 			pm.add_match(supernode=next_supernode, candidate_node=cand)  # we have a bigger partial match to explore
 			match_subgraph(cs, pm, solution)  # this recursion step guarantees we have a DFS search. This tree is huge

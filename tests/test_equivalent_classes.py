@@ -1,7 +1,7 @@
+import time
+
 from uclasmcode import equivalence_partition
 from uclasmcode.utils import data
-import uclasmcode.uclasm as uclasm
-import time
 
 verbose = True
 
@@ -82,21 +82,21 @@ def experiment(graph):
         start_time = time.time()
         results[ch] = equivalence_partition.partition_vertices(adj_matrix)
         time_mat[ch] = time.time() - start_time  # save the time took to compute the partition
-        print("Finished channel: " + ch + ". Took %5f seconds" % (time_mat[ch]))
+        # print("Finished channel: " + ch + ". Took %5f seconds" % (time_mat[ch]))
 
     equivpartition = equivalence_partition.combine_channel_equivalence(results)
     return equivpartition
 
 
 def test_tim_test_graph_1():
-    print("Starting data loading")
+    # print("Starting data loading")
     start_time = time.time()
     tmplts, world = data.tim_test_graph_1()
     tmplt = tmplts[0]
-    print("Loading took {} seconds".format(time.time() - start_time))
+    # print("Loading took {} seconds".format(time.time() - start_time))
 
     part = experiment(tmplt)
-    print_stats(part, tmplt, True, True)
+    # print_stats(part, tmplt, True, True)
     assert len(part.classes()) == 2
     non_triv = [len(i) for i in part.classes() if len(i) > 1]
     assert sorted(non_triv) == [2, 2]

@@ -1,13 +1,11 @@
 """ Simple utilities used for debugging, logging, profiling, testing, etc. """
 
-import logging
 import datetime
-import profile
-
+import logging
 
 # setup logger
 now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-LOGFILE_NAME = '{}_{}.log'.format(now, "test")
+LOGFILE_NAME = '{}.log'.format("test")  # TODO: Set this to correct format when logging
 # prints log to stdout and also saves to specified log file
 logger = logging.getLogger('my_logfile')
 fh = logging.FileHandler(LOGFILE_NAME)
@@ -42,7 +40,7 @@ def print_debug(*msg):
 def print_info(msg: str):
     logger.info(msg)
     if VERBOSE:
-        print(msg)
+        print("UPDATE: ", msg)
 
 
 def get_dict_str(d: dict) -> str:

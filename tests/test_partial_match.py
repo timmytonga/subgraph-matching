@@ -1,5 +1,3 @@
-from uclasmcode.candidate_structure.supernodes import Supernode
-from uclasmcode.candidate_structure.solution_tree import *
 from uclasmcode.candidate_structure.partial_match import *
 
 
@@ -31,3 +29,6 @@ def test_create():
                          Supernode(new_match[4]))
     assert four_match == create_partial_match(5)
 
+
+def test_isjoinable():
+    pass

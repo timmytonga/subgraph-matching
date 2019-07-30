@@ -10,12 +10,16 @@ class Supernode(object):
 
     channels = []  # class attribute: a list of channels. Initialized in main
 
-    def __init__(self, equiv_class: list or set or tuple):
+    def __init__(self, equiv_class: list or set or tuple, name: str=None):
         """ Note that equiv_class should be either a set, list or tuple """
         try:
             self.vertices = tuple(sorted(equiv_class))  # for ease of comparing
         except TypeError:  # maybe better checks here
             self.vertices = tuple([equiv_class])
+        if name is None:
+            self.name = str(self.vertices)
+        else:
+            self.name = name  # ideally the tuple with the real name
 
     def get_vertices(self) -> tuple:
         """ returns a tuple of vertices of the equiv class of the supernode"""
@@ -41,4 +45,4 @@ class Supernode(object):
         return not self.__eq__(other)
 
     def __str__(self):
-        return "Supernode"+str(self.vertices)
+        return "Supernode"+self.name
