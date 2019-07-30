@@ -18,6 +18,7 @@ from .data_loaders import ivysys_v9
 from .data_loaders import transportation
 from .data_loaders import foodweb
 from .data_loaders import bench_mark
+from .data_loaders import tim_test_graph_1
 
 all = []
 names = []
@@ -58,3 +59,5 @@ all.append(ivysys_v9)
 names.append("ivysys_v9")
 all.append(transportation)
 names.append("transportation")
+all.append(tim_test_graph_1)
+names.append("tim_test_graph_1")

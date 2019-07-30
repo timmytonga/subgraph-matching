@@ -5,7 +5,7 @@ import numpy as np
 from scipy import sparse
 import sys
 sys.path.append("..")
-import uclasm
+import uclasmcode.uclasm as uclasm
 
 WORLD_PREFIX = "world"
 TMPLT_PREFIX = "tmplt_{}"
@@ -19,7 +19,7 @@ def save_graph(dirpath, prefix, graph):
     nodes_fp, channels_fp, adjs_fp = get_filenames(dirpath, prefix)
 
     np.save(nodes_fp, graph.nodes)
-    pickle.dump(graph.channels, open(channels_fp, "wb"))
+    pickle.dump(list(graph.channels), open(channels_fp, "wb"))
     for channel, adj in zip(graph.channels, graph.adjs):
         sparse.save_npz(adjs_fp.format(channel), adj)
 

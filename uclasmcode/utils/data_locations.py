@@ -7,7 +7,7 @@ from glob import glob
 
 root_folder = "/s2/scr/reu_data/darpa_maa/data/"
 
-TA1_TEAMS = ["GORDIAN", "IVYSYS", "PNNL","EXAMPLE"]
+TA1_TEAMS = ["GORDIAN", "IVYSYS", "PNNL","EXAMPLE", "TIM"]
 
 def get_data_dir(data_root,
                  ta1_team=None,
@@ -91,6 +91,11 @@ def get_data_dir(data_root,
         # Examples all have one instance per version
         return dataset_root
 
+    elif ta1_team == "TIM":
+        assert instance in range(10)
+        return os.path.join(dataset_root, "B{}".format(instance))
+
+
 class NetFileGetter:
     def __init__(self,
                  ta1_team=None,
@@ -108,11 +113,15 @@ class NetFileGetter:
                 self.ta1_team=="IVYSYS" and self.version >= 8:
             self.data_root = "/s1/scr/reu_data2/darpa_maa/data/"
 
+        if self.ta1_team == "TIM":  # local for now
+            self.data_root= "/Users/thiennguyen/reu-subgraph-matching/Tims-DARPA/data"
+
         self.net_dir = get_data_dir(self.data_root,
                                     ta1_team=self.ta1_team,
                                     version=self.version,
                                     instance=self.instance,
                                     model=self.model)
+
 
     def get_cache_dir(self):
         dir_name_parts = [self.ta1_team.lower()]

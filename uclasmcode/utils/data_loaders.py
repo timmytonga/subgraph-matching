@@ -14,7 +14,7 @@ from scipy.sparse import csr_matrix
 from .data_locations import NetFileGetter
 import sys
 sys.path.append("..")
-import uclasm
+import uclasmcode.uclasm as uclasm
 
 from .data_caching import save_cache, load_cache
 
@@ -162,6 +162,7 @@ def from_edgelist(filepath,
 
     return nodes, list(channel_to_adj.keys()), list(channel_to_adj.values())
 
+
 def load_ground_truth(filepath):
     node_to_truth = {}
     with open(filepath) as fin:
@@ -172,6 +173,7 @@ def load_ground_truth(filepath):
             truth = line[1]
             node_to_truth[node] = truth
     return node_to_truth
+
 
 def get_graphs(file_getter,
                el_pattern_str,
@@ -306,6 +308,7 @@ def get_dataset(file_getter,
     save_cache(cache_dir, tmplts, world)
 
     return tmplts, world
+
 
 def repair_pnnl_v2(src, dst, channel):
     """
@@ -696,6 +699,16 @@ bench_mark = lambda i=0, verbose=True: get_dataset(
     file_getter=NetFileGetter(ta1_team="EXAMPLE", version=2, instance=i),
     tmplt_from_el_kwargs={"el_pattern_str": "bench_mark_template.csv"},
     world_from_el_kwargs={"el_pattern_str": "bench_mark_world.csv"},
+    from_el_kwargs={
+        "src_col": 0,
+        "dst_col": 1,
+        "channel_col": 2,
+        "verbose": verbose})
+
+tim_test_graph_1 = lambda i=0, verbose=True: get_dataset(
+    file_getter=NetFileGetter(ta1_team="Tim", version=0, instance=i),
+    tmplt_from_el_kwargs={"el_pattern_str": "tim_test_graph_1_template.csv"},
+    world_from_el_kwargs={"el_pattern_str": "tim_test_graph_1_world.csv"},
     from_el_kwargs={
         "src_col": 0,
         "dst_col": 1,

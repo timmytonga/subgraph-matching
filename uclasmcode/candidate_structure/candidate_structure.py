@@ -137,9 +137,9 @@ class CandidateStructure(object):
 		for ch in self.tmplt_graph.channels:
 			if supernode.is_clique(ch):  # only check for clique channels
 				supernode_submatrix = self._get_submatrix(
-					self.tmplt_graph.ch_to_adj[ch], supernode.get_vertices())
+					self.tmplt_graph.ch_to_adj[ch].A, supernode.get_vertices())
 				candidate_node_submatrix = self._get_submatrix(
-					self.world_graph.ch_to_adj[ch], cand_node.get_vertices())
+					self.world_graph.ch_to_adj[ch].A, cand_node.get_vertices())
 				if not np.all(candidate_node_submatrix >= supernode_submatrix):
 					# if our world graph does not contain a similar clique in that channel
 					return False
@@ -157,7 +157,7 @@ class CandidateStructure(object):
 		get_elem = iter(ec)
 		first = next(get_elem)
 		second = next(get_elem)
-		for ch, adj in self.tmplt_graph.ch_to_adj:
+		for ch, adj in self.tmplt_graph.ch_to_adj.items():
 			result[ch] = adj[first, second]  # 0 if not clique and number of edges otherwise
 		return result
 
@@ -166,3 +166,6 @@ class CandidateStructure(object):
 		""" Given a matrix and a list of coordinates, return the submatrix corresponding
 		to the given coordinates (idx)"""
 		return matrix[np.ix_(idx, idx)]
+
+	def __str__(self):
+		return str(self.equiv_classes)  # for now
