@@ -7,6 +7,7 @@ Utilities functions for match_subgraph function. Includes:
 from .candidate_structure import CandidateStructure, SuperTemplateNode
 from .partial_match import PartialMatch
 from .supernodes import Supernode
+from .simple_utils import print_debug
 
 
 def is_joinable(
@@ -48,15 +49,40 @@ def is_joinable(
     return True
 
 
-def pick_next_candidate(cs: CandidateStructure, pm: PartialMatch) -> SuperTemplateNode:
-    """ The order changes each match.... """
-    pass
+class Ordering(object):
+    """ A utility class for keeping track of orderings"""
 
+    def __init__(self, cs: CandidateStructure):
+        self.cs = cs
+        self.initial_ordering = self.find_good_ordering_template()
+        assert len(self.initial_ordering) == self.cs.get_supernodes_count()
+        self.index = 0
 
-def find_good_ordering_template(cs: CandidateStructure) -> [SuperTemplateNode]:
-    """ Gives a good ordering of the template node
-    Probably use some ranking function to order the template node """
-    return [i[0] for i in sorted(cs.get_supernodes_cand_count().items(), key=lambda x: x[1])]
+    def get_next_cand(self, pm: PartialMatch) -> SuperTemplateNode:
+        """ Given a partial match, return a good next candidate """
+        # print_debug("Ordering.index = " + str(self.index))
+        to_return = self.initial_ordering[self.index]
+        assert to_return not in pm.matches, "DEBUGGING: THIS SHOULD NOT HAPPEN..."
+        if to_return in pm.matches:  # why????
+            self.index += 1
+            to_return = self.initial_ordering[self.index]
+        return to_return
+
+    def increment_index(self):
+        # print_debug(f"Incrementing ordering index to: {self.index+1}")
+        self.index += 1
+
+    def decrement_index(self):
+        # print_debug(f"Decrementing ordering index to: {self.index-1}")
+        self.index -= 1
+
+    def find_good_ordering_template(self) -> [SuperTemplateNode]:
+        """ Gives a good ordering of the template node
+        Probably use some ranking function to order the template node """
+        return [i[0] for i in sorted(self.cs.get_supernodes_cand_count().items(), key=lambda x: x[1])]
+
+    def __str__(self):
+        return str([str(i) for i in self.initial_ordering])
 
 
 def rank_template_node(cs: CandidateStructure, sn: SuperTemplateNode) -> int:

@@ -38,11 +38,21 @@ class CandidateStructure(object):
 		self.world_graph = world
 		self.candidates_array = candidates  # a 2D boolean array of shape (#TemplateNode, #WorldNodes) indicate candidates
 		self.equiv_classes = equiv_classes  # store the equivalent classes information to check equiv.
-		self.non_trivial_supernodes: {SuperTemplateNode} = set()  # a set of all the nontrivial supernodes (size >1)
 
+		self.non_trivial_supernodes: {SuperTemplateNode} = set()  # a set of all the nontrivial supernodes (size >1)
 		self._supernodes = {}  # a dict storing root: SuperTemplateNode
 		# a dict storing the candidates (subsets) of nontrivial supernodes.
 		self._non_triv_candidates: {SuperTemplateNode: [Supernode]} = {}
+
+	def copy(self):
+		""" We need to copy the world_graph since tmplt is never modified """
+		temp = CandidateStructure(
+			self.tmplt_graph, self.world_graph.copy(),
+			self.candidates_array.copy(), self.equiv_classes)
+		temp._supernodes = self._supernodes
+		temp.non_trivial_supernodes = self.non_trivial_supernodes
+		temp._non_triv_candidates = self._non_triv_candidates.copy()
+		return temp
 
 	@property
 	def non_triv_candidates(self) -> {SuperTemplateNode: [Supernode]}:
@@ -168,7 +178,7 @@ class CandidateStructure(object):
 		""" Returns the number of candidates that supernode has"""
 		return int(np.sum(self.candidates_array[supernode.get_root()]))
 
-	def get_cand_count(self) -> [int]:
+	def get_cand_count(self) -> np.ndarray:
 		""" Returns an array where each index specify the number of candidates
 		This is just for individual node and not taken into account equiv classes"""
 		return np.sum(self.candidates_array, axis=1)
@@ -195,6 +205,12 @@ class CandidateStructure(object):
 					# if our world graph does not contain a similar clique in that channel
 					return False
 		return True  # here we have passed all channels clique test
+
+	def check_satisfiability(self) -> bool:
+		""" Returns a bool indicating with the current
+		candidate structure, a solution is possible.
+		Just check if any cand_count = 0. This is called ideally after filtering"""
+		return not np.any(self.get_cand_count() == 0)  # returns False if any cand is 0
 
 	# ===== helper ======
 	def in_same_equiv_class(self, t1: int, t2: int) -> bool:

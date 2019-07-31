@@ -22,10 +22,11 @@ Methods:
 	- add_solution 
 """
 
-from .supernodes import Supernode
+from .supernodes import Supernode, SuperTemplateNode
 from .partial_match import PartialMatch
 from anytree import Node, RenderTree, DoubleStyle 		# we use the anytree library for tree
 import math 		# for factorial
+from .candidate_structure import CandidateStructure
 
 
 class SolutionNode(Node):
@@ -33,7 +34,7 @@ class SolutionNode(Node):
 	def __init__(self, sn: Supernode = None, parent=None, name=None):
 		self.supernode = sn
 		if name is None:
-			name = str(sn)
+			name = str(sn.name)
 		Node.__init__(self, name, parent, supernode=sn)
 
 	def __hash__(self):
@@ -49,7 +50,8 @@ class SolutionTree(object):
 	""" Solution tree contains a tree representation of solutions to the subgraph isomorphism problem
 	This class also provides queries to obtain other information about the solution space of related problems
 	"""
-	def __init__(self, ordering: [Supernode]):
+
+	def __init__(self, ordering: [SuperTemplateNode], name_dict: {int: str} = None):
 		""" ordering specifies an ordering of the template nodes in form of a list
 		ideally should be to minimize the width of the tree """
 		self.root = SolutionNode(name="root") 	# this is the main tree
@@ -58,6 +60,7 @@ class SolutionTree(object):
 		self.template_candidate_dict = {i: set() for i in ordering}
 		self.template_node_ordering = ordering
 		self.num_tmplt_nodes = len(self.template_node_ordering)
+		self.name_dict = name_dict  # this is world.node_idxs
 
 	# ###### QUERIES #########
 	def print_tree(self):  # nice fancy function from library
@@ -88,14 +91,14 @@ class SolutionTree(object):
 		self._append_to_tree(match_dict)
 
 	# # PRIVATE
-	def _append_to_tree(self, match_dict: {Supernode: set}) -> None:
+	def _append_to_tree(self, match_dict: {SuperTemplateNode: Supernode}) -> None:
 		""" Given a match from template nodes to set of world node
 		Append it to tree and add appropriate nodes to dictionary"""
 		prev_node = self.root  # we start at the root
 		# then we traverse the tree in the same order we were given with
 		for i in range(self.num_tmplt_nodes):  # iterate over all tmplt nodes
 			curr_tmplt_node = self.template_node_ordering[i]  # the current node
-			match = Supernode(match_dict[curr_tmplt_node])  # we change the matching set to a supernode
+			match = match_dict[curr_tmplt_node]  # we change the matching set to a supernode
 			# given the hash is correct, we should add each match only once
 			self.template_candidate_dict[curr_tmplt_node].add(match)
 			# now we check if there's a child already on this path
@@ -106,7 +109,9 @@ class SolutionTree(object):
 					prev_node = child  # we want to keep the same child for next layer
 					break
 			if not child_flag:  # if there's no child, create one and set it as that for next run
-				prev_node = SolutionNode(match, parent=prev_node)
+				prev_node = SolutionNode(
+					match, name=str([self.name_dict[i] for i in match.get_vertices()]),
+					parent=prev_node)
 
 	def _increase_counter(self, match_dict: {Supernode: set}) -> None:
 		""" Given a matching in a form of dictionary, we increase the isomorphism count appropriately"""
@@ -121,6 +126,8 @@ class SolutionTree(object):
 		"""
 		:return: a nicely printed tree format of the solution tree
 		"""
+		if self.num_isomorphisms == 0:
+			return "UNSATISFIABLE PROBLEM: NO ISOMORPHISM FOUND."
 		result = str([str(i) for i in self.template_node_ordering]) + "\n"
 		for pre, _, node in RenderTree(self.root, style=DoubleStyle):
 			result += ("%s%s\n" % (pre, node.name))

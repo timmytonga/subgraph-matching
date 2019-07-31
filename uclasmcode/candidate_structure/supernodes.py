@@ -87,7 +87,7 @@ class SuperTemplateNode(Supernode):
         return len(self) == 1  # is equivalent to checking self.clique_dict is None
 
     def __str__(self):
-        return f"SuperTemplateNode({self.name})"
+        return f"SuperTemplateNode{self.name}"
 
     def __repr__(self):
         return f"SuperTemplateNode{self.vertices} with cliques: {str(self.clique_dict)}"

@@ -34,7 +34,7 @@ def print_debug(msg):
     """ Logging and stuff """
     # logger.debug(msg)
     if DEBUG:
-        print("DEBUG", msg)
+        print("DEBUG:", msg)
 
 
 def print_info(msg: str):
