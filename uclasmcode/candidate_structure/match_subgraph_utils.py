@@ -53,10 +53,10 @@ def pick_next_candidate(cs: CandidateStructure, pm: PartialMatch) -> SuperTempla
     pass
 
 
-def find_good_ordering_template(cs: CandidateStructure) -> [Supernode]:
+def find_good_ordering_template(cs: CandidateStructure) -> [SuperTemplateNode]:
     """ Gives a good ordering of the template node
     Probably use some ranking function to order the template node """
-    pass
+    return [i[0] for i in sorted(cs.get_supernodes_cand_count().items(), key=lambda x: x[1])]
 
 
 def rank_template_node(cs: CandidateStructure, sn: SuperTemplateNode) -> int:

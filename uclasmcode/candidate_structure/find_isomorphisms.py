@@ -37,7 +37,7 @@ NUM_THREADS = 1
 
 def initialize_solution_tree(cs: CandidateStructure) -> SolutionTree:
 	""" Given a cs, find a good ordering of the template nodes and initialize the solution tree"""
-	good_ordering = match_subgraph_utils.find_good_ordering_template(cs)  #todo
+	good_ordering = match_subgraph_utils.find_good_ordering_template(cs)
 	sol = SolutionTree(good_ordering)
 	return sol
 
@@ -62,7 +62,7 @@ def match_subgraph(cs: CandidateStructure, pm: PartialMatch, solution: SolutionT
 	next_supernode = match_subgraph_utils.pick_next_candidate(cs, pm)  #todo
 
 	# TODO: Can parallelize this for loop (mutex solution and need to duplicate pm/cs)
-	for cand in cs.get_candidates(supernode=next_supernode):  # get the candidates of our chosen supernode
+	for cand in cs.get_candidates(next_supernode):  # get the candidates of our chosen supernode
 		# cand can be a singleton or a larger subset depending on the size of the supernode.
 		# get_candidates in cs will take care of either case and return an appropriate iterator
 		# this iterator guarantees we do not
@@ -76,7 +76,7 @@ def match_subgraph(cs: CandidateStructure, pm: PartialMatch, solution: SolutionT
 		else: 	# do we need to do anything if a candidate is not joinable?
 			pass
 	# NOTE; need to have a change stack? or implement in cs? copy?
-	cs.restore_changes() 	#todo # not sure which one we modify <- might be needed since we could've modified a lot
+	cs.restore_changes()  # todo: not sure which one we modify <- might be needed since we could've modified a lot
 	return
 
 

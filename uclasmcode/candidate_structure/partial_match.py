@@ -1,10 +1,8 @@
 """ by Tim Nguyen (7/17/19)
 PartialMatch class: Data structure for matching algorithm to modify, update, restore partial matches """
 
-
-from .candidate_structure import SuperTemplateNode
 from .simple_utils import print_info
-from .supernodes import Supernode
+from .supernodes import Supernode, SuperTemplateNode
 
 
 class PartialMatch(object):
@@ -20,20 +18,21 @@ class PartialMatch(object):
         # dictionary of Supernode to a set of matched nodes of same size as supernode
         # #Note that __hash__ is defined in Supernode
         self.matches = {}  # {SuperTemplateNode: Supernode}
-        self.node_stack = []
+        self.node_stack = []  # a stack of last added SuperTemplateNodes
         self.already_matched_world_nodes = set()  # for checking alldiff
 
     # ========== METHODS ===========
-    def rm_last_match(self) -> (SuperTemplateNode, Supernode):
-        """ pop the last match from the stack and returns it """
-        return self.matches.pop(self.node_stack.pop())
+    def rm_last_match(self) -> None:
+        """ pop the last match from the stack and remove the other stuff"""
+        last_super_node = self.node_stack.pop()
+        self.already_matched_world_nodes -= set(self.matches.pop(last_super_node).get_vertices())
 
     def rm_match(self, name_of_node: SuperTemplateNode) -> None:
         """ Given a supernode remove it from the matches
             can be a risky method """
         assert name_of_node in self.matches, "PartialMatch.rm_match: Trying to remove a node (%s) that has not \
                                             been matched. "
-        self.matches.pop(name_of_node)
+        pass
 
     def add_match(self, supernode: SuperTemplateNode, candidate_node: Supernode):
         """ add the new_match to the matches. """

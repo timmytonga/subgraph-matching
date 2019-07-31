@@ -18,50 +18,8 @@ import numpy as np
 from uclasmcode.equivalence_partition.equivalence_data_structure import Equivalence
 from uclasmcode.uclasm.utils.data_structures import Graph
 from .simple_utils import print_debug
-from .supernodes import Supernode
-
-
-class SuperTemplateNode(Supernode):
-	""" A class to contain information about the super template nodes
-	Each node is an equivalent class and contains additional information
-	about clique and connectivity """
-	def __init__(
-			self, equiv_class: set or tuple or int,
-			clique_dict: {str: bool} = None, name: str = None, root=None):
-		Supernode.__init__(self, equiv_class, name)
-		# a dictionary of channel and a number specifying clique: 0 if not a clique
-		# 	otherwise a number to indicate the number of edges that form the clique
-		#   IMPORTANT: clique_dict will be of type None if the equiv class is trivial
-		self.clique_dict = clique_dict
-		self._root = root
-
-	def is_clique(self, channel) -> bool:
-		""" Returns whether this supernode is a clique or not (only relevant for size >1)
-		"""
-		if self.is_trivial():  # a single node always forms a clique
-			return True
-		# the check above ensure the access below is valid
-		return self.clique_dict[channel] > 0
-
-	def get_root(self) -> int:
-		""" This method is for obtaining one node in the supernode
-		Since everything is sorted, this method will always return the same value for the same supernode
-		and different values for different supernode in the same problem"""
-		return self._root
-
-	def get_size(self) -> int:
-		""" Same as len but maybe easier to understand """
-		return len(self)
-
-	def is_trivial(self) -> bool:
-		""" Returns whether if self is trivial i.e. equiv class of length 1"""
-		return len(self) == 1  # is equivalent to checking self.clique_dict is None
-
-	def __str__(self):
-		return f"SuperTemplateNode({self.name})"
-
-	def __repr__(self):
-		return f"SuperTemplateNode{self.vertices} with cliques: {str(self.clique_dict)}"
+from .supernodes import Supernode, SuperTemplateNode
+from itertools import combinations  # for getting all subsets
 
 
 class CandidateStructure(object):
@@ -78,9 +36,23 @@ class CandidateStructure(object):
 		assert len(equiv_classes) != 0, "Empty equivalent classes!"
 		self.tmplt_graph = template  # store references for important info
 		self.world_graph = world
-		self.candidates_array = candidates
-		self.equiv_classes = equiv_classes
-		self._supernodes = {}
+		self.candidates_array = candidates  # a 2D boolean array of shape (#TemplateNode, #WorldNodes) indicate candidates
+		self.equiv_classes = equiv_classes  # store the equivalent classes information to check equiv.
+		self.non_trivial_supernodes: {SuperTemplateNode} = set()  # a set of all the nontrivial supernodes (size >1)
+
+		self._supernodes = {}  # a dict storing root: SuperTemplateNode
+		# a dict storing the candidates (subsets) of nontrivial supernodes.
+		self._non_triv_candidates: {SuperTemplateNode: [Supernode]} = {}
+
+	@property
+	def non_triv_candidates(self) -> {SuperTemplateNode: [Supernode]}:
+		""" Dictionary of non trivial supernodes with list of subsets of possible candidates"""
+		if len(self._non_triv_candidates) == 0:
+			assert len(self.non_trivial_supernodes) != 0, "Supernodes haven't been initialized"
+			for sn in self.non_trivial_supernodes:  # this has potential to be empty
+				candidates = self._get_cand_list(sn)  # this is a list of idxs of candidates
+				self._non_triv_candidates[sn] = list(combinations(candidates, len(sn)))
+		return self._non_triv_candidates
 
 	@property
 	def supernodes(self) -> {SuperTemplateNode}:
@@ -89,10 +61,13 @@ class CandidateStructure(object):
 		if len(self._supernodes) == 0:
 			for ec in self.equiv_classes.classes():
 				root = self.equiv_classes.compress_to_root(next(iter(ec)))
-				self._supernodes[root] = (SuperTemplateNode(
+				temp = (SuperTemplateNode(
 					ec, self._get_equiv_class_clique_dict(ec),
 					name=str([self.tmplt_graph.nodes[i] for i in ec]),
 					root=root))
+				self._supernodes[root] = temp
+				if len(ec) > 1:
+					self.non_trivial_supernodes.add(temp)
 		return self._supernodes
 
 	@property
@@ -177,16 +152,31 @@ class CandidateStructure(object):
 		Should be the same as the size of the union of all nodes in the supernodes"""
 		return self.tmplt_graph.n_nodes
 
-	def get_candidates(self, supernode):
+	def get_candidates(self, sn: SuperTemplateNode) -> iter:
 		""" Returns an iterator of candidates of a given supernode
 		Iterates through subsets of nodes for supernodes rather than permutations
 		Yields singleton for trivial supernodes """
 		# IMPORTANT: must use yield for iterator.... can be complicated wrt storage
-		pass
+		if sn.is_trivial():
+			cand_list = self._get_cand_list(sn)
+		else:
+			cand_list = self.non_triv_candidates[sn]
+		for n in cand_list:
+			yield Supernode(n)
 
 	def get_candidates_count(self, supernode: SuperTemplateNode) -> int:
 		""" Returns the number of candidates that supernode has"""
 		return int(np.sum(self.candidates_array[supernode.get_root()]))
+
+	def get_cand_count(self) -> [int]:
+		""" Returns an array where each index specify the number of candidates
+		This is just for individual node and not taken into account equiv classes"""
+		return np.sum(self.candidates_array, axis=1)
+
+	def get_supernodes_cand_count(self) -> {SuperTemplateNode: int}:
+		""" Returns a dictionary of supernodes and their candidate counts
+		This time we take into account of subsets and such"""
+		return {sn: self.get_candidates_count(sn) for sn in self.supernodes.values()}
 
 	def supernode_clique_and_cand_node_clique(self, supernode: SuperTemplateNode, cand_node: Supernode) -> bool:
 		""" Returns a bool specifying if the given cand_node satisfy the clique condition of supernode:
@@ -204,8 +194,7 @@ class CandidateStructure(object):
 				if not np.all(candidate_node_submatrix >= supernode_submatrix):
 					# if our world graph does not contain a similar clique in that channel
 					return False
-		# here we passed all channels clique test
-		return True
+		return True  # here we have passed all channels clique test
 
 	# ===== helper ======
 	def in_same_equiv_class(self, t1: int, t2: int) -> bool:
@@ -233,14 +222,18 @@ class CandidateStructure(object):
 		to the given coordinates (idx)"""
 		return matrix[np.ix_(idx, idx)]
 
+	def get_supernode_by_idx(self, idx: int) -> SuperTemplateNode:
+		""" Given the index of a node, return the supernode"""
+		return self.supernodes[self.equiv_classes.compress_to_root(idx)]
+
 	def get_supernode_by_name(self, name: str) -> SuperTemplateNode:
 		""" Given a name of a node, return the supernode"""
 		idx = self.tmplt_graph.node_idxs[name]
 		return self.get_supernode_by_idx(idx)
 
-	def get_supernode_by_idx(self, idx: int) -> SuperTemplateNode:
-		""" Given the index of a node, return the supernode"""
-		return self.supernodes[self.equiv_classes.compress_to_root(idx)]
+	def _get_cand_list(self, sn: SuperTemplateNode) -> [int]:
+		""" Return the indices of the candidates of sn"""
+		return list(i[0] for i in np.argwhere(self.candidates_array[sn.get_root()]))
 
 	def __str__(self):
 		return str(self.equiv_classes)  # for now
