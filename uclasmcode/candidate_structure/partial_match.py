@@ -17,7 +17,7 @@ class PartialMatch(object):
         """ """
         # dictionary of Supernode to a set of matched nodes of same size as supernode
         # #Note that __hash__ is defined in Supernode
-        self.matches = {}  # {SuperTemplateNode: Supernode}
+        self.matches: {SuperTemplateNode: Supernode} = {}
         self.node_stack = []  # a stack of last added SuperTemplateNodes
         self.already_matched_world_nodes = set()  # for checking alldiff
 
@@ -56,7 +56,7 @@ class PartialMatch(object):
     # === utils ====
     def __str__(self):
         """ Gives the string of the matched dictionary """
-        return str([(str(u), str(v)) for u, v in self.matches.items()])
+        return str([(str(u.name), str(v.name)) for u, v in self.matches.items()])
 
     def __repr__(self):
         """ Gives some useful info for debugging """

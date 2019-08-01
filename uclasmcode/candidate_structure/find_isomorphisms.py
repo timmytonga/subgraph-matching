@@ -46,7 +46,8 @@ def match_subgraph(
 		# this means we have a matching
 		# TODO: Optional count only (do not store solution tree)
 		solution.add_solution(pm)
-		print_info(f"FOUND a match: {str(pm)}")
+		print_info(f"FOUND a match: {str(pm)}.")
+		print_info(f"Current iso count: {str(solution.get_isomorphisms_count())}")
 		# maybe restore candidate structure here if modified below
 		return  # here we should return to the previous state to try other candidates
 
@@ -72,8 +73,8 @@ def match_subgraph(
 			# if we can join, we add it to the partial match and recurse until we have a full match
 			pm.add_match(supernode=next_supernode, candidate_node=cand)  # we have a bigger partial match to explore
 			ordering.increment_index()
-            match_subgraph(cs, pm, solution,
-                           ordering)  # this recursion step guarantees we have a DFS search. This tree is huge
+			match_subgraph(cs, pm, solution,
+			               ordering)  # this recursion step guarantees we have a DFS search. This tree is huge
 			# if the above run correctly, we should have already explored all the branches below given a partial match
 			# we return to get back to the top level, but before doing so, we must restore our data structure.
 			ordering.decrement_index()
@@ -91,16 +92,16 @@ def initialize_solution_tree(good_ordering, cs: CandidateStructure) -> SolutionT
 	return sol
 
 
-def find_isomorphisms(cs: CandidateStructure) -> SolutionTree:
+def find_isomorphisms(candstruct: CandidateStructure) -> SolutionTree:
 	""" Given a cs, find all solutions and append them to a solution tree
 	for returning"""
 	print_info("======= BEGINNING FIND_ISOMORPHISM =====")
-	ordering = Ordering(cs)
+	ordering = Ordering(candstruct)
 	print_info(f"Initialized an initial ordering: {str(ordering)}")
 	good_ordering = ordering.initial_ordering
-	sol = initialize_solution_tree(good_ordering, cs)
+	sol = initialize_solution_tree(good_ordering, candstruct)
 	partial_match = PartialMatch()
 	print_info("======= BEGIN SUBGRAPH MATCHING =======")
-	match_subgraph(cs, partial_match, sol, ordering)
+	match_subgraph(candstruct, partial_match, sol, ordering)
 	print_info(f"====== Finished subgraph matching. Returning solution tree. =====")
 	return sol
