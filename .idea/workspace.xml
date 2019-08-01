@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e1b9a9a1-89c7-40ce-b890-10841c110376" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/uclasmcode/candidate_structure/find_isomorphisms.py" beforeDir="false" afterPath="$PROJECT_DIR$/uclasmcode/candidate_structure/find_isomorphisms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/uclasmcode/candidate_structure/partial_match.py" beforeDir="false" afterPath="$PROJECT_DIR$/uclasmcode/candidate_structure/partial_match.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,8 +18,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/partial_match.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="118">
-                  <caret line="40" column="43" selection-start-line="40" selection-start-column="43" selection-end-line="40" selection-end-column="43" />
+                <state relative-caret-position="270">
+                  <caret line="18" column="27" lean-forward="true" selection-start-line="18" selection-start-column="27" selection-end-line="18" selection-end-column="27" />
                   <folding>
                     <element signature="e#135#171#0" expanded="true" />
                   </folding>
@@ -67,10 +65,23 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/find_isomorphisms.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="780">
-                  <caret line="52" lean-forward="true" selection-start-line="52" selection-end-line="52" />
+                <state relative-caret-position="229">
+                  <caret line="99" column="31" selection-start-line="99" selection-start-column="31" selection-end-line="99" selection-end-column="31" />
                   <folding>
+                    <element signature="e#0#1596#1" />
                     <element signature="e#1598#1649#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/simple_utils.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="301">
+                  <caret line="36" column="21" selection-start-line="36" selection-start-column="21" selection-end-line="36" selection-end-column="21" />
+                  <folding>
+                    <element signature="e#80#95#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -130,6 +141,11 @@
       </list>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -198,24 +214,6 @@
             <path>
               <item name="Tims-DARPA" type="b2602c69:ProjectViewProjectNode" />
               <item name="Tims-DARPA" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Tims-DARPA" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Tims-DARPA" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-              <item name="TIM" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Tims-DARPA" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Tims-DARPA" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-              <item name="TIM" type="462c0819:PsiDirectoryNode" />
-              <item name="V0" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Tims-DARPA" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Tims-DARPA" type="462c0819:PsiDirectoryNode" />
               <item name="uclasmcode" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -223,12 +221,6 @@
               <item name="Tims-DARPA" type="462c0819:PsiDirectoryNode" />
               <item name="uclasmcode" type="462c0819:PsiDirectoryNode" />
               <item name="candidate_structure" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Tims-DARPA" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Tims-DARPA" type="462c0819:PsiDirectoryNode" />
-              <item name="uclasmcode" type="462c0819:PsiDirectoryNode" />
-              <item name="utils" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -476,7 +468,14 @@
       <option name="project" value="LOCAL" />
       <updated>1564620279763</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Quick fix for some updates: more informative logging and printing&#10;&#10;Need to IMPLEMENT FILTERS and RECOVERING METHODS&#10;Need to OBTAIN BETTER NODE ORDERING">
+      <created>1564621139439</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1564621139439</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TodoView">
@@ -549,7 +548,8 @@
     <MESSAGE value="Possibly have finished Iterator for candidates.&#10;Also finished writing a naive candidate ordering based on candidate counts&#10;TODO:&#10;- Need to finish Pick_next_candidate to test find_isomorphism&#10;- Need to make better test cases for multichannel isjoinable&#10;- Possibly need to find better candidate initial ordering... &#10;- Need to write filters and restore candidates&#10;    + Filter using naive pre-existing filters&#10;    + Filter using new nbhd filter for equiv classes &#10;    + Filter subsets using clique and such &#10;- Need to check for unsatisfiable problem: Check cand_count&#10;- Need to find better iterating patterns for non-trivial supernodes&#10;    + Possibly use equiv classes of candidates" />
     <MESSAGE value="Potentially finished barebone for find_isomorphisms.&#10;&#10;Need to IMPLEMENT FILTERS and RECOVERING METHODS&#10;Need to OBTAIN BETTER NODE ORDERING" />
     <MESSAGE value="Fixed a bug in increase_counter in solution tree.&#10;&#10;Need to IMPLEMENT FILTERS and RECOVERING METHODS&#10;Need to OBTAIN BETTER NODE ORDERING" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed a bug in increase_counter in solution tree.&#10;&#10;Need to IMPLEMENT FILTERS and RECOVERING METHODS&#10;Need to OBTAIN BETTER NODE ORDERING" />
+    <MESSAGE value="Quick fix for some updates: more informative logging and printing&#10;&#10;Need to IMPLEMENT FILTERS and RECOVERING METHODS&#10;Need to OBTAIN BETTER NODE ORDERING" />
+    <option name="LAST_COMMIT_MESSAGE" value="Quick fix for some updates: more informative logging and printing&#10;&#10;Need to IMPLEMENT FILTERS and RECOVERING METHODS&#10;Need to OBTAIN BETTER NODE ORDERING" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
@@ -793,16 +793,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/simple_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="36" column="21" selection-start-line="36" selection-start-column="21" selection-end-line="36" selection-end-column="21" />
-          <folding>
-            <element signature="e#80#95#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/candidate_structure.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2445">
@@ -855,22 +845,33 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/find_isomorphisms.py">
+    <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/partial_match.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="780">
-          <caret line="52" lean-forward="true" selection-start-line="52" selection-end-line="52" />
+        <state relative-caret-position="270">
+          <caret line="18" column="27" lean-forward="true" selection-start-line="18" selection-start-column="27" selection-end-line="18" selection-end-column="27" />
           <folding>
-            <element signature="e#1598#1649#0" expanded="true" />
+            <element signature="e#135#171#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/partial_match.py">
+    <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/simple_utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="118">
-          <caret line="40" column="43" selection-start-line="40" selection-start-column="43" selection-end-line="40" selection-end-column="43" />
+        <state relative-caret-position="301">
+          <caret line="36" column="21" selection-start-line="36" selection-start-column="21" selection-end-line="36" selection-end-column="21" />
           <folding>
-            <element signature="e#135#171#0" expanded="true" />
+            <element signature="e#80#95#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/find_isomorphisms.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="229">
+          <caret line="99" column="31" selection-start-line="99" selection-start-column="31" selection-end-line="99" selection-end-column="31" />
+          <folding>
+            <element signature="e#0#1596#1" />
+            <element signature="e#1598#1649#0" expanded="true" />
           </folding>
         </state>
       </provider>

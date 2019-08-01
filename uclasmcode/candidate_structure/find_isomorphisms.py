@@ -32,6 +32,7 @@ from .partial_match import PartialMatch
 from .solution_tree import SolutionTree
 from .match_subgraph_utils import Ordering, is_joinable
 from .simple_utils import print_info, print_debug
+import uclasmcode.candidate_structure.simple_utils as simple_utils
 
 NUM_THREADS = 1
 
@@ -73,8 +74,8 @@ def match_subgraph(
 			# if we can join, we add it to the partial match and recurse until we have a full match
 			pm.add_match(supernode=next_supernode, candidate_node=cand)  # we have a bigger partial match to explore
 			ordering.increment_index()
-			match_subgraph(cs, pm, solution,
-			               ordering)  # this recursion step guarantees we have a DFS search. This tree is huge
+			match_subgraph(
+				cs, pm, solution, ordering)  # this recursion step guarantees we have a DFS search. This tree is huge
 			# if the above run correctly, we should have already explored all the branches below given a partial match
 			# we return to get back to the top level, but before doing so, we must restore our data structure.
 			ordering.decrement_index()
@@ -92,9 +93,13 @@ def initialize_solution_tree(good_ordering, cs: CandidateStructure) -> SolutionT
 	return sol
 
 
-def find_isomorphisms(candstruct: CandidateStructure) -> SolutionTree:
+def find_isomorphisms(candstruct: CandidateStructure, verbose=True, debug=True) -> SolutionTree:
 	""" Given a cs, find all solutions and append them to a solution tree
 	for returning"""
+	if not verbose:
+		simple_utils.VERBOSE = False
+	if not debug:
+		simple_utils.DEBUG = False
 	print_info("======= BEGINNING FIND_ISOMORPHISM =====")
 	ordering = Ordering(candstruct)
 	print_info(f"Initialized an initial ordering: {str(ordering)}")
