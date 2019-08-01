@@ -1,7 +1,7 @@
 """ by Tim Nguyen (7/17/19)
 PartialMatch class: Data structure for matching algorithm to modify, update, restore partial matches """
 
-from .simple_utils import print_info
+from .logging_utils import print_info
 from .supernodes import Supernode, SuperTemplateNode
 
 

@@ -31,10 +31,11 @@ from .candidate_structure import CandidateStructure
 from .partial_match import PartialMatch
 from .solution_tree import SolutionTree
 from .match_subgraph_utils import Ordering, is_joinable
-from .simple_utils import print_info, print_debug
-import uclasmcode.candidate_structure.simple_utils as simple_utils
+from .logging_utils import print_info, print_debug
+import uclasmcode.candidate_structure.logging_utils as simple_utils
 
 NUM_THREADS = 1
+STOP_FLAG = False  # a flag to stop matching
 
 
 def match_subgraph(
@@ -42,20 +43,23 @@ def match_subgraph(
 		solution: SolutionTree, ordering: Ordering) -> None:
 	""" pm: dictionary of supernode and matched nodes for partial matches
 		Require a solution tree to be initialized as a global variable with name solution"""
+	if STOP_FLAG:  # something wants us to stop
+		return
 	# BASE CASE: if pm has enough matched nodes
 	if len(pm) == cs.get_supernodes_count():
 		# this means we have a matching
-		# TODO: Optional count only (do not store solution tree)
 		solution.add_solution(pm)
-		print_info(f"FOUND a match: {str(pm)}.")
-		print_info(f"Current iso count: {str(solution.get_isomorphisms_count())}")
+		print_debug(f"FOUND a match: {str(pm)}.")
+		print_info(f"FOUND a match. Current iso count: {str(solution.get_isomorphisms_count())}")
 		# maybe restore candidate structure here if modified below
 		return  # here we should return to the previous state to try other candidates
 
 	# We haven't finished the match. We must find another one to add onto the match until we have enough
 	# Need something like CandidateStructure.run_cheap_filters(partialMatch)
 	copy_of_cs = cs.copy()
-	cs.run_cheap_filters(partial_match=pm)  # todo
+
+	cs.update_candidates(pm.matches)  # this modifies candidates_array
+	cs.run_cheap_filters()  # this modifies world_graph and candidates_array
 
 	# see if this is satisfiable
 	if not cs.check_satisfiability():
@@ -65,7 +69,9 @@ def match_subgraph(
 	next_supernode = ordering.get_next_cand(pm)  # todo
 	print_debug(f"The current next_supernode is: {str(next_supernode)}")
 
-	# TODO: Can parallelize this for loop (mutex solution and need to duplicate pm/cs)
+	# TODO: Can parallelize this for loop (mutex solution and need to duplicate pm/cs/ordering/iterator/etc.)
+	# TODO: This might be taking up a lot of memory for huge tree and because of combinations
+	# --> solution: index pointer, candidates equiv.
 	for cand in cs.get_candidates(next_supernode):  # get the candidates of our chosen supernode
 		# cand can be a singleton or a larger subset depending on the size of the supernode.
 		# get_candidates in cs will take care of either case and return an appropriate iterator
@@ -82,18 +88,19 @@ def match_subgraph(
 			pm.rm_last_match()
 		else: 	# do we need to do anything if a candidate is not joinable?
 			pass
-	# NOTE; need to have a change stack? or implement in cs? copy?
-	cs = copy_of_cs
+	cs = copy_of_cs  # restore the cs before returning
 	return
 
 
-def initialize_solution_tree(good_ordering, cs: CandidateStructure) -> SolutionTree:
+def initialize_solution_tree(good_ordering, cs: CandidateStructure, count_only=False) -> SolutionTree:
 	""" Given a cs, find a good ordering of the template nodes and initialize the solution tree"""
-	sol = SolutionTree(good_ordering, cs.world_graph.nodes)
+	sol = SolutionTree(good_ordering, cs.world_graph.nodes, count_only=count_only)
 	return sol
 
 
-def find_isomorphisms(candstruct: CandidateStructure, verbose=True, debug=True) -> SolutionTree:
+def find_isomorphisms(
+		candstruct: CandidateStructure, verbose=True, debug=True, count_only=False
+) -> SolutionTree:
 	""" Given a cs, find all solutions and append them to a solution tree
 	for returning"""
 	simple_utils.VERBOSE = verbose
@@ -102,7 +109,7 @@ def find_isomorphisms(candstruct: CandidateStructure, verbose=True, debug=True) 
 	ordering = Ordering(candstruct)
 	print_info(f"Initialized an initial ordering: {str(ordering)}")
 	good_ordering = ordering.initial_ordering
-	sol = initialize_solution_tree(good_ordering, candstruct)
+	sol = initialize_solution_tree(good_ordering, candstruct, count_only)
 	partial_match = PartialMatch()
 	print_info("======= BEGIN SUBGRAPH MATCHING =======")
 	match_subgraph(candstruct, partial_match, sol, ordering)

@@ -17,9 +17,10 @@ import numpy as np
 
 from uclasmcode.equivalence_partition.equivalence_data_structure import Equivalence
 from uclasmcode.uclasm.utils.data_structures import Graph
-from .simple_utils import print_debug
+from .logging_utils import print_debug
 from .supernodes import Supernode, SuperTemplateNode
 from itertools import combinations  # for getting all subsets
+from uclasmcode import uclasm
 
 
 class CandidateStructure(object):
@@ -43,6 +44,7 @@ class CandidateStructure(object):
 		self._supernodes = {}  # a dict storing root: SuperTemplateNode
 		# a dict storing the candidates (subsets) of nontrivial supernodes.
 		self._non_triv_candidates: {SuperTemplateNode: [Supernode]} = {}
+		self._equiv_size_array = []
 
 	def copy(self):
 		""" We need to copy the world_graph since tmplt is never modified """
@@ -84,14 +86,45 @@ class CandidateStructure(object):
 	def channels(self):
 		return self.tmplt_graph.channels
 
+	@property
+	def num_world_nodes(self):
+		return self.world_graph.n_nodes
+
+	@property
+	def equiv_size_array(self):
+		"""
+		:return: An array of shape tmplt node that contains the size of equiv classes
+		"""
+		if len(self._equiv_size_array) == 0:
+			self._equiv_size_array = np.array(
+				[self.equiv_classes.root_size_map[self.equiv_classes.compress_to_root(i)] for i in
+				 range(self.tmplt_graph.n_nodes)]
+			)
+		return self._equiv_size_array
+
 	# matching algorithm should have some good ordering to follow candidate-edges
 	# heap sorts only order but how to take into account edge information.... BFS search ordering... 
 	# 	obtain neighbor list of current node -> sort and append to order  (how to get neighbors?)
 	# ========== METHODS ==========
-	def run_cheap_filters(self, partial_match) -> "Some sort of ways to rep. candidates":
+	def update_candidates(self, match_dict: {SuperTemplateNode: Supernode}) -> None:
+		""" Given a match dictionary, update the candidates_array to reflect the matches"""
+		for sn, match in match_dict.items():
+			# make an np array of shape (len(sn), world.n_nodes) to all False
+			toset = (np.zeros((len(sn), self.num_world_nodes), dtype=np.bool))
+			toset[:, match.vertices] = True  # set only the matching vertices to True
+			# then set the appropriate rows and columns
+			self.candidates_array[np.ix_(sn.vertices, range(self.num_world_nodes))] = toset
+
+	def run_cheap_filters(self) -> None:
 		""" Not sure if we should modify the current structure directly and store the changes
 			somewhere for restore or if we should make a new structure entirely """
-		pass
+		# TODO: Modify filters to only run on root node of supernodes (minor speed up??)
+		# TODO: Modify topology filter to take into account of edge multiplicity in supernodes
+		# TODO: Neighborhood filter for cliques (union)
+		# TODO: topology filter still slow
+		_, self.world_graph, self.candidates_array = uclasm.run_filters(
+			self.tmplt_graph, self.world_graph,
+			candidates=self.candidates_array, filters=uclasm.cheap_filters)
 
 	def restore_changes(self):
 		""" Not sure what this does yet but we might need to restore some changes say by the filters """
@@ -147,46 +180,18 @@ class CandidateStructure(object):
 			return False
 		return True  # pass all checks means True
 
-	def get_superedge_multiplicity(self, t1: SuperTemplateNode, t2: SuperTemplateNode, channel: str) -> int:
-		""" Returns whether two SuperTemplateNode has an edge in a specific channel in the template graph
-		O(1) """
-		return self.tmplt_graph.ch_to_adj[channel][t1.get_root(), t2.get_root()]
-
-	def get_supernodes_count(self):
-		"""Return the total number of super nodes in the candidate structure.
-		Should be the same as the number of equivalent classes """
-		return len(self.supernodes)
-
-	def get_template_nodes_count(self):
-		"""Return the total number of template node.
-		Should be the same as the size of the union of all nodes in the supernodes"""
-		return self.tmplt_graph.n_nodes
-
 	def get_candidates(self, sn: SuperTemplateNode) -> iter:
 		""" Returns an iterator of candidates of a given supernode
 		Iterates through subsets of nodes for supernodes rather than permutations
 		Yields singleton for trivial supernodes """
 		# IMPORTANT: must use yield for iterator.... can be complicated wrt storage
+		# TODO: Equivalent classes in world nodes
 		if sn.is_trivial():
 			cand_list = self._get_cand_list(sn)
 		else:
 			cand_list = self.non_triv_candidates[sn]
 		for n in cand_list:
 			yield Supernode(n)
-
-	def get_candidates_count(self, supernode: SuperTemplateNode) -> int:
-		""" Returns the number of candidates that supernode has"""
-		return int(np.sum(self.candidates_array[supernode.get_root()]))
-
-	def get_cand_count(self) -> np.ndarray:
-		""" Returns an array where each index specify the number of candidates
-		This is just for individual node and not taken into account equiv classes"""
-		return np.sum(self.candidates_array, axis=1)
-
-	def get_supernodes_cand_count(self) -> {SuperTemplateNode: int}:
-		""" Returns a dictionary of supernodes and their candidate counts
-		This time we take into account of subsets and such"""
-		return {sn: self.get_candidates_count(sn) for sn in self.supernodes.values()}
 
 	def supernode_clique_and_cand_node_clique(self, supernode: SuperTemplateNode, cand_node: Supernode) -> bool:
 		""" Returns a bool specifying if the given cand_node satisfy the clique condition of supernode:
@@ -210,7 +215,7 @@ class CandidateStructure(object):
 		""" Returns a bool indicating with the current
 		candidate structure, a solution is possible.
 		Just check if any cand_count = 0. This is called ideally after filtering"""
-		return not np.any(self.get_cand_count() == 0)  # returns False if any cand is 0
+		return np.all(self.get_cand_count() >= self.equiv_size_array)  # returns False if any cand is 0
 
 	# ===== helper ======
 	def in_same_equiv_class(self, t1: int, t2: int) -> bool:
@@ -253,3 +258,49 @@ class CandidateStructure(object):
 
 	def __str__(self):
 		return str(self.equiv_classes)  # for now
+
+	# === NUMBER QUERIES ====
+	def get_superedge_multiplicity(self, t1: SuperTemplateNode, t2: SuperTemplateNode, channel: str) -> int:
+		""" Returns whether two SuperTemplateNode has an edge in a specific channel in the template graph
+		O(1) """
+		return self.tmplt_graph.ch_to_adj[channel][t1.get_root(), t2.get_root()]
+
+	def get_supernodes_count(self):
+		"""Return the total number of super nodes in the candidate structure.
+		Should be the same as the number of equivalent classes """
+		return len(self.supernodes)
+
+	def get_template_nodes_count(self):
+		"""Return the total number of template node.
+		Should be the same as the size of the union of all nodes in the supernodes"""
+		return self.tmplt_graph.n_nodes
+
+	def get_candidates_count(self, supernode: SuperTemplateNode) -> int:
+		""" Returns the number of candidates that supernode has"""
+		return int(np.sum(self.candidates_array[supernode.get_root()]))
+
+	def get_degree(self, supernode: SuperTemplateNode) -> int:
+		""" Returns the degree (in+out) of a supernode"""
+		return int(np.sum(self.tmplt_graph.sym_composite_adj[supernode.get_root()], axis=1))
+
+	def get_nbr_count(self, supernode: SuperTemplateNode):
+		""" Returns the number of neighbors of a supernode"""
+		return int(np.sum(self.tmplt_graph.is_nbr[supernode.get_root()], axis=1))
+
+	def get_cand_count(self) -> np.ndarray:
+		""" Returns an array where each index specify the number of candidates
+		This is just for individual node and not taken into account equiv classes"""
+		return np.sum(self.candidates_array, axis=1)
+
+	def get_supernodes_cand_count(self) -> {SuperTemplateNode: int}:
+		""" Returns a dictionary of supernodes and their candidate counts
+		This time we take into account of subsets and such"""
+		return {sn: self.get_candidates_count(sn) for sn in self.supernodes.values()}
+
+	def get_supernodes_degrees(self) -> {SuperTemplateNode: int}:
+		""" Returns a dictionary of supernodes and degree """
+		return {sn: self.get_degree(sn) for sn in self.supernodes.values()}
+
+	def get_supernodes_nbr_count(self) -> {SuperTemplateNode: int}:
+		""" Returns a dictionary of supernodes and their neighbor counts"""
+		return {sn: self.get_nbr_count(sn) for sn in self.supernodes.values()}

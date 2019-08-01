@@ -3,7 +3,7 @@ import uclasmcode.uclasm as uclasm
 import time
 from uclasmcode import equivalence_partition
 from uclasmcode.candidate_structure.find_isomorphisms import *
-from uclasmcode.candidate_structure.simple_utils import print_stats
+from uclasmcode.candidate_structure.logging_utils import print_stats
 
 # d = data.pnnl_v6()
 # d = data.ivysys_v7()

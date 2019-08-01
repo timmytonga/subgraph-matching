@@ -50,7 +50,7 @@ class SolutionTree(object):
 	This class also provides queries to obtain other information about the solution space of related problems
 	"""
 
-	def __init__(self, ordering: [SuperTemplateNode], name_dict: {int: str} = None):
+	def __init__(self, ordering: [SuperTemplateNode], name_dict: {int: str} = None, count_only=False):
 		""" ordering specifies an ordering of the template nodes in form of a list
 		ideally should be to minimize the width of the tree """
 		self.root = SolutionNode(name="root") 	# this is the main tree
@@ -60,6 +60,7 @@ class SolutionTree(object):
 		self.template_node_ordering = ordering
 		self.num_tmplt_nodes = len(self.template_node_ordering)
 		self.name_dict = name_dict  # this is world.node_idxs
+		self.count_only = count_only
 
 	# ###### QUERIES #########
 	def print_tree(self):  # nice fancy function from library
@@ -87,7 +88,8 @@ class SolutionTree(object):
 		# first we update the counter
 		self._increase_counter(match_dict)
 		# now we add the solution to the tree
-		self._append_to_tree(match_dict)
+		if not self.count_only:
+			self._append_to_tree(match_dict)
 
 	# # PRIVATE
 	def _append_to_tree(self, match_dict: {SuperTemplateNode: Supernode}) -> None:

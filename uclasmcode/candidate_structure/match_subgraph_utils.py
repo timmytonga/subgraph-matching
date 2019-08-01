@@ -7,7 +7,7 @@ Utilities functions for match_subgraph function. Includes:
 from .candidate_structure import CandidateStructure, SuperTemplateNode
 from .partial_match import PartialMatch
 from .supernodes import Supernode
-from .simple_utils import print_debug
+from .logging_utils import print_debug
 
 
 def is_joinable(
@@ -79,7 +79,12 @@ class Ordering(object):
     def find_good_ordering_template(self) -> [SuperTemplateNode]:
         """ Gives a good ordering of the template node
         Probably use some ranking function to order the template node """
-        return [i[0] for i in sorted(self.cs.get_supernodes_cand_count().items(), key=lambda x: x[1])]
+        # need to build a tuple (SuperTemplateNode, cand_count, degree)
+        cand_counts = self.cs.get_supernodes_count()
+        degrees = self.cs.get_supernodes_degrees()
+        nbr = self.cs.get_supernodes_nbr_count()
+        triple = [(sn, cand_counts[sn], degrees[sn], nbr[sn]) for sn in self.cs.supernodes]
+        return [i[0] for i in sorted(triple, key=lambda x: (x[1], -x[2], -x[3]))]
 
     def __str__(self):
         return str([str(i) for i in self.initial_ordering])

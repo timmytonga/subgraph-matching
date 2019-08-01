@@ -10,7 +10,7 @@ tmplt, world, candidates = uclasm.run_filters(tmplt, world,
                                               filters=uclasm.cheap_filters,
                                               verbose=False)
 equiv_classes = equivalence_partition.partition_multichannel(tmplt.ch_to_adj)
-cs = CandidateStructure(tmplt, world, candidates, equiv_classes)
+cs = CandidateStructure(tmplt, world, candidates, equiv_classes)  # cs of b0
 
 
 tmplts1, world1 = data.tim_test_graph_1(1)
@@ -52,6 +52,25 @@ def test_supernode_clique_and_candnode_clique():
             assert not cs.supernode_clique_and_cand_node_clique(
                 sn, Supernode([0, 1])
             )
+
+
+def test_equiv_size_array():
+    assert np.all(cs.equiv_size_array == np.array([2, 2, 2, 2]))
+    assert np.all(cs1.equiv_size_array == np.array([2, 1, 1, 1, 2]))
+
+
+def test_check_satisfiability():
+    assert cs.check_satisfiability()
+    temp = cs.candidates_array.copy()
+    cs.candidates_array[0, 0] = False
+    assert not cs.check_satisfiability()
+    cs.candidates_array = temp
+    assert cs.check_satisfiability()
+    assert cs1.check_satisfiability()
+    temp = cs1.candidates_array.copy()
+    cs1.candidates_array[3, 3] = False
+    assert not cs1.check_satisfiability()
+    cs1.candidates_array = temp
 
 
 def test_has_cand_edge():

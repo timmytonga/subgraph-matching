@@ -2,14 +2,15 @@
 
 import datetime
 import logging
+from logging.handlers import RotatingFileHandler
 
 # setup logger
 now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 LOGFILE_NAME = '{}.log'.format("test")  # TODO: Set this to correct format when logging
 # prints log to stdout and also saves to specified log file
 logger = logging.getLogger('my_logfile')
-fh = logging.FileHandler(LOGFILE_NAME)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh = RotatingFileHandler(LOGFILE_NAME, mode='a', maxBytes=5 * 1024 * 1024, backupCount=2, encoding=None, delay=0)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s:\n\t%(message)s')
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 # ## UNCOMMENT BELOW FOR STDOUT
