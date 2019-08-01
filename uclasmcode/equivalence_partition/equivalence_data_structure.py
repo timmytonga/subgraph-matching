@@ -124,7 +124,7 @@ class Equivalence(object):
         """ returns the root of a, and on the way, set the roots of the parents of a
         to be the root of a"""
         assert a in self.parent_map, "Equivalence.compress_to_root: "+ str(a) + "does not exist."
-        parents_of_a = set() # set to store the parents of a
+        parents_of_a = set()  # set to store the parents of a
         curr_val = a   # current value
         while curr_val != self.parent_map[curr_val]:
             # while the current value is not its own parent (otherwise it's the root)
