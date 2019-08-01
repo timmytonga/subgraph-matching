@@ -3,7 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="e1b9a9a1-89c7-40ce-b890-10841c110376" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/uclasmcode/candidate_structure/find_isomorphisms.py" beforeDir="false" afterPath="$PROJECT_DIR$/uclasmcode/candidate_structure/find_isomorphisms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/uclasmcode/candidate_structure/partial_match.py" beforeDir="false" afterPath="$PROJECT_DIR$/uclasmcode/candidate_structure/partial_match.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/uclasmcode/candidate_structure/simple_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/uclasmcode/candidate_structure/simple_utils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -14,15 +15,21 @@
   <component name="FileEditorManager">
     <splitter split-orientation="horizontal" split-proportion="0.47555205">
       <split-first>
-        <leaf>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/partial_match.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="270">
-                  <caret line="18" column="27" lean-forward="true" selection-start-line="18" selection-start-column="27" selection-end-line="18" selection-end-column="27" />
-                  <folding>
-                    <element signature="e#135#171#0" expanded="true" />
-                  </folding>
+                <state relative-caret-position="280">
+                  <caret line="39" column="83" selection-start-line="39" selection-start-column="83" selection-end-line="39" selection-end-column="83" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/tests/test_equivalent_classes.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="141">
+                  <caret line="18" lean-forward="true" selection-start-line="18" selection-end-line="18" />
                 </state>
               </provider>
             </entry>
@@ -43,7 +50,7 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/tests/test_partial_match.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="424">
+                <state relative-caret-position="450">
                   <caret line="30" selection-start-line="30" selection-end-line="30" />
                 </state>
               </provider>
@@ -52,21 +59,21 @@
         </leaf>
       </split-first>
       <split-second>
-        <leaf>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/supernodes.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-716">
-                  <caret line="17" column="34" lean-forward="true" selection-start-line="17" selection-start-column="34" selection-end-line="17" selection-end-column="34" />
+                <state relative-caret-position="255">
+                  <caret line="17" column="34" selection-start-line="17" selection-start-column="34" selection-end-line="17" selection-end-column="34" />
                 </state>
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/find_isomorphisms.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="229">
-                  <caret line="99" column="31" selection-start-line="99" selection-start-column="31" selection-end-line="99" selection-end-column="31" />
+                <state relative-caret-position="186">
+                  <caret line="50" column="13" selection-start-line="50" selection-start-column="13" selection-end-line="50" selection-end-column="13" />
                   <folding>
                     <element signature="e#0#1596#1" />
                     <element signature="e#1598#1649#0" expanded="true" />
@@ -75,11 +82,11 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/simple_utils.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="301">
-                  <caret line="36" column="21" selection-start-line="36" selection-start-column="21" selection-end-line="36" selection-end-column="21" />
+                <state relative-caret-position="230">
+                  <caret line="50" column="12" selection-start-line="50" selection-start-column="12" selection-end-line="50" selection-end-column="12" />
                   <folding>
                     <element signature="e#80#95#0" expanded="true" />
                   </folding>
@@ -90,8 +97,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/solution_tree.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="310">
-                  <caret line="92" column="25" selection-start-line="92" selection-start-column="25" selection-end-line="92" selection-end-column="25" />
+                <state relative-caret-position="213">
+                  <caret line="100" column="54" selection-start-line="100" selection-start-column="54" selection-end-line="100" selection-end-column="54" />
                   <folding>
                     <element signature="e#992#1044#0" expanded="true" />
                   </folding>
@@ -100,10 +107,13 @@
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/uclasmcode/utils/data_locations.py">
+            <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/match_subgraph_utils.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="472">
-                  <caret line="67" selection-start-line="67" selection-end-line="67" />
+                <state relative-caret-position="507">
+                  <caret line="66" column="20" selection-start-line="66" selection-start-column="20" selection-end-line="66" selection-end-column="20" />
+                  <folding>
+                    <element signature="e#112#182#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
@@ -129,6 +139,8 @@
       <find>instan</find>
       <find>equiv</find>
       <find>supernodes</find>
+      <find>Adding</find>
+      <find>bcol</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -181,21 +193,21 @@
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/tests/test_isjoinable.py" />
-        <option value="$PROJECT_DIR$/uclasmcode/candidate_structure/simple_utils.py" />
         <option value="$PROJECT_DIR$/uclasmcode/candidate_structure/match_subgraph_utils.py" />
         <option value="$PROJECT_DIR$/uclasmcode/candidate_structure/supernodes.py" />
         <option value="$PROJECT_DIR$/uclasmcode/candidate_structure/candidate_structure.py" />
         <option value="$PROJECT_DIR$/setup.py" />
         <option value="$PROJECT_DIR$/uclasmcode/candidate_structure/solution_tree.py" />
-        <option value="$PROJECT_DIR$/uclasmcode/candidate_structure/partial_match.py" />
         <option value="$PROJECT_DIR$/uclasmcode/candidate_structure/find_isomorphisms.py" />
+        <option value="$PROJECT_DIR$/uclasmcode/candidate_structure/simple_utils.py" />
+        <option value="$PROJECT_DIR$/uclasmcode/candidate_structure/partial_match.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-1" />
-    <option name="y" value="23" />
-    <option name="width" value="1440" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="64" />
+    <option name="y" value="-925" />
+    <option name="width" value="1577" />
     <option name="height" value="808" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -210,6 +222,11 @@
             <path>
               <item name="Tims-DARPA" type="b2602c69:ProjectViewProjectNode" />
               <item name="Tims-DARPA" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Tims-DARPA" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Tims-DARPA" type="462c0819:PsiDirectoryNode" />
+              <item name="tests" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="Tims-DARPA" type="b2602c69:ProjectViewProjectNode" />
@@ -326,6 +343,8 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.tests" />
+        <item itemvalue="Python.solution_tree" />
         <item itemvalue="Python.tests" />
         <item itemvalue="Python.solution_tree" />
       </list>
@@ -475,7 +494,14 @@
       <option name="project" value="LOCAL" />
       <updated>1564621139439</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="better printing&#10;&#10;Need to IMPLEMENT FILTERS and RECOVERING METHODS&#10;Need to OBTAIN BETTER NODE ORDERING">
+      <created>1564678326675</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1564678326675</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TodoView">
@@ -488,10 +514,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1" y="23" width="1440" height="808" extended-state="6" />
+    <frame x="64" y="-925" width="1577" height="808" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20577872" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.12982005" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -502,7 +528,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.3286908" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.32960895" />
-      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.49964765" visible="true" weight="0.21648045" />
+      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.49964765" weight="0.21648045" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5003524" side_tool="true" weight="0.31284916" />
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.2751773" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -549,7 +575,8 @@
     <MESSAGE value="Potentially finished barebone for find_isomorphisms.&#10;&#10;Need to IMPLEMENT FILTERS and RECOVERING METHODS&#10;Need to OBTAIN BETTER NODE ORDERING" />
     <MESSAGE value="Fixed a bug in increase_counter in solution tree.&#10;&#10;Need to IMPLEMENT FILTERS and RECOVERING METHODS&#10;Need to OBTAIN BETTER NODE ORDERING" />
     <MESSAGE value="Quick fix for some updates: more informative logging and printing&#10;&#10;Need to IMPLEMENT FILTERS and RECOVERING METHODS&#10;Need to OBTAIN BETTER NODE ORDERING" />
-    <option name="LAST_COMMIT_MESSAGE" value="Quick fix for some updates: more informative logging and printing&#10;&#10;Need to IMPLEMENT FILTERS and RECOVERING METHODS&#10;Need to OBTAIN BETTER NODE ORDERING" />
+    <MESSAGE value="better printing&#10;&#10;Need to IMPLEMENT FILTERS and RECOVERING METHODS&#10;Need to OBTAIN BETTER NODE ORDERING" />
+    <option name="LAST_COMMIT_MESSAGE" value="better printing&#10;&#10;Need to IMPLEMENT FILTERS and RECOVERING METHODS&#10;Need to OBTAIN BETTER NODE ORDERING" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
@@ -689,10 +716,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/2019-07-29 16:21:27_test.log">
-      <provider selected="true" editor-type-id="LogFileEditorProvider" />
-      <provider editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/2019-07-29 16:21:27_test.log" />
     <entry file="file://$PROJECT_DIR$/uclasmcode/utils/data.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="363">
@@ -739,13 +763,6 @@
     <entry file="file://$PROJECT_DIR$/test.log">
       <provider selected="true" editor-type-id="LogFileEditorProvider" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/test_equivalent_classes.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="106">
-          <caret line="71" lean-forward="true" selection-start-line="71" selection-end-line="71" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
@@ -786,10 +803,10 @@
     <entry file="file://$PROJECT_DIR$/tests/test.log">
       <provider selected="true" editor-type-id="LogFileEditorProvider" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/test_partial_match.py">
+    <entry file="file://$PROJECT_DIR$/setup.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="424">
-          <caret line="30" selection-start-line="30" selection-end-line="30" />
+        <state relative-caret-position="318">
+          <caret line="80" lean-forward="true" selection-start-line="80" selection-end-line="80" />
         </state>
       </provider>
     </entry>
@@ -804,23 +821,40 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/tests/test_partial_match.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="30" selection-start-line="30" selection-end-line="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/supernodes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="17" column="34" selection-start-line="17" selection-start-column="34" selection-end-line="17" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/uclasmcode/utils/data_locations.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="472">
+        <state relative-caret-position="990">
           <caret line="67" selection-start-line="67" selection-end-line="67" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/setup.py">
+    <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/solution_tree.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="318">
-          <caret line="80" lean-forward="true" selection-start-line="80" selection-end-line="80" />
+        <state relative-caret-position="213">
+          <caret line="100" column="54" selection-start-line="100" selection-start-column="54" selection-end-line="100" selection-end-column="54" />
+          <folding>
+            <element signature="e#992#1044#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/match_subgraph_utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="125">
+        <state relative-caret-position="507">
           <caret line="66" column="20" selection-start-line="66" selection-start-column="20" selection-end-line="66" selection-end-column="20" />
           <folding>
             <element signature="e#112#182#0" expanded="true" />
@@ -828,51 +862,38 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/solution_tree.py">
+    <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/find_isomorphisms.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="310">
-          <caret line="92" column="25" selection-start-line="92" selection-start-column="25" selection-end-line="92" selection-end-column="25" />
+        <state relative-caret-position="186">
+          <caret line="50" column="13" selection-start-line="50" selection-start-column="13" selection-end-line="50" selection-end-column="13" />
           <folding>
-            <element signature="e#992#1044#0" expanded="true" />
+            <element signature="e#0#1596#1" />
+            <element signature="e#1598#1649#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/supernodes.py">
+    <entry file="file://$PROJECT_DIR$/tests/test_equivalent_classes.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-716">
-          <caret line="17" column="34" lean-forward="true" selection-start-line="17" selection-start-column="34" selection-end-line="17" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/partial_match.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="18" column="27" lean-forward="true" selection-start-line="18" selection-start-column="27" selection-end-line="18" selection-end-column="27" />
-          <folding>
-            <element signature="e#135#171#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="141">
+          <caret line="18" lean-forward="true" selection-start-line="18" selection-end-line="18" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/simple_utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="301">
-          <caret line="36" column="21" selection-start-line="36" selection-start-column="21" selection-end-line="36" selection-end-column="21" />
+        <state relative-caret-position="230">
+          <caret line="50" column="12" selection-start-line="50" selection-start-column="12" selection-end-line="50" selection-end-column="12" />
           <folding>
             <element signature="e#80#95#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/find_isomorphisms.py">
+    <entry file="file://$PROJECT_DIR$/uclasmcode/candidate_structure/partial_match.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="229">
-          <caret line="99" column="31" selection-start-line="99" selection-start-column="31" selection-end-line="99" selection-end-column="31" />
-          <folding>
-            <element signature="e#0#1596#1" />
-            <element signature="e#1598#1649#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="280">
+          <caret line="39" column="83" selection-start-line="39" selection-start-column="83" selection-end-line="39" selection-end-column="83" />
         </state>
       </provider>
     </entry>
