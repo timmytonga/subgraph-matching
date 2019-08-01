@@ -43,8 +43,8 @@ def get_now():
 # ## Trivial utils
 def print_debug(msg):
 	""" Logging and stuff """
-	# logger.debug(msg)
 	if DEBUG:
+		logger.debug(msg)
 		print(f"{bcolors.WARNING}DEBUG:{bcolors.ENDC}", msg)
 
 

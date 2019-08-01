@@ -17,7 +17,7 @@ class Equivalence(object):
         self.parent_map = {a: a for a in starting_set}
         # dictionary of root: size_of_tree
         # also serves as something to store the roots
-        self.root_size_map = {a : 1 for a in starting_set}
+        self.root_size_map = {a: 1 for a in starting_set}
 
     ### METHODS ###
     def add_singleton(self, new_value):
@@ -34,7 +34,7 @@ class Equivalence(object):
         # get the roots while compressing the tree
         root_of_a = self.compress_to_root(a)
         root_of_b = self.compress_to_root(b)
-        if (root_of_a == root_of_b):
+        if root_of_a == root_of_b:
             return # they are already in the same equivalence class
         # find the "big" root and the "small" root
         small_root, big_root = (root_of_a, root_of_b) if self.root_size_map[root_of_a] < self.root_size_map[root_of_b] \
@@ -117,7 +117,9 @@ class Equivalence(object):
         """ print out the equiv classes """
         return "Equiv Classes: " + str(self.classes()) + "\nParent_map: " + str(self.parent_map) + "\nRoot_size_map: "+str(self.root_size_map)
 
-    ### PRIVATE METHODS ###
+    def get_equiv_size(self, node):
+        return self.root_size_map[self.compress_to_root(node)]
+
     def compress_to_root(self, a) -> 'root of a':
         """ returns the root of a, and on the way, set the roots of the parents of a
         to be the root of a"""
@@ -133,3 +135,7 @@ class Equivalence(object):
         for i in parents_of_a:
             self.parent_map[i] = curr_val
         return curr_val
+
+    def get_all_roots(self) -> {int or str}:
+        """ Return all the roots of the equiv classes"""
+        return set(self.root_size_map.keys())
