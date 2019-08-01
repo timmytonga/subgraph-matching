@@ -26,7 +26,6 @@ from .supernodes import Supernode, SuperTemplateNode
 from .partial_match import PartialMatch
 from anytree import Node, RenderTree, DoubleStyle 		# we use the anytree library for tree
 import math 		# for factorial
-from .candidate_structure import CandidateStructure
 
 
 class SolutionNode(Node):
@@ -78,7 +77,7 @@ class SolutionTree(object):
 
 	def get_min_complete_cand_set(self):
 		""" Returns a list of sets"""
-		return list(self.template_candidate_dict.values())
+		return list(i for i in self.template_candidate_dict.values())
 
 	# ###### METHODS #########
 	def add_solution(self, matching: PartialMatch) -> None:
@@ -115,10 +114,10 @@ class SolutionTree(object):
 
 	def _increase_counter(self, match_dict: {Supernode: set}) -> None:
 		""" Given a matching in a form of dictionary, we increase the isomorphism count appropriately"""
+		temp = 1
 		for sn, matches in match_dict.items():
-			# a match contributes all the permutation to a solution. This number can be huge
-			# Python supports large integers naturally
-			self.num_isomorphisms += math.factorial(len(matches))
+			temp *= math.factorial(len(matches))
+		self.num_isomorphisms += temp
 
 	# ### UTILITIES
 

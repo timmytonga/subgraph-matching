@@ -72,8 +72,8 @@ def match_subgraph(
 			# if we can join, we add it to the partial match and recurse until we have a full match
 			pm.add_match(supernode=next_supernode, candidate_node=cand)  # we have a bigger partial match to explore
 			ordering.increment_index()
-			match_subgraph(cs, pm, solution,
-						   ordering)  # this recursion step guarantees we have a DFS search. This tree is huge
+            match_subgraph(cs, pm, solution,
+                           ordering)  # this recursion step guarantees we have a DFS search. This tree is huge
 			# if the above run correctly, we should have already explored all the branches below given a partial match
 			# we return to get back to the top level, but before doing so, we must restore our data structure.
 			ordering.decrement_index()
