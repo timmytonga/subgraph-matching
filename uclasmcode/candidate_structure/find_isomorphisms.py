@@ -96,10 +96,8 @@ def initialize_solution_tree(good_ordering, cs: CandidateStructure) -> SolutionT
 def find_isomorphisms(candstruct: CandidateStructure, verbose=True, debug=True) -> SolutionTree:
 	""" Given a cs, find all solutions and append them to a solution tree
 	for returning"""
-	if not verbose:
-		simple_utils.VERBOSE = False
-	if not debug:
-		simple_utils.DEBUG = False
+	simple_utils.VERBOSE = verbose
+	simple_utils.DEBUG = debug
 	print_info("======= BEGINNING FIND_ISOMORPHISM =====")
 	ordering = Ordering(candstruct)
 	print_info(f"Initialized an initial ordering: {str(ordering)}")
