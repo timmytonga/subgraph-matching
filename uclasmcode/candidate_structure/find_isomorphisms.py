@@ -43,36 +43,41 @@ def match_subgraph(
 		solution: SolutionTree, ordering: Ordering) -> None:
 	""" pm: dictionary of supernode and matched nodes for partial matches
 		Require a solution tree to be initialized as a global variable with name solution"""
+	# print_debug(
+	# 	f"MATCH_SUBGRAPH: Current partial match {str(pm)} and current candidates array \n"
+	# 	f"{str(cs.candidates_array)}")
 	if STOP_FLAG:  # something wants us to stop
 		return
+
 	# BASE CASE: if pm has enough matched nodes
 	if len(pm) == cs.get_supernodes_count():
 		# this means we have a matching
 		solution.add_solution(pm)
-		print_debug(f"FOUND a match: {str(pm)}.")
 		print_info(f"FOUND a match. Current iso count: {str(solution.get_isomorphisms_count())}")
 		# maybe restore candidate structure here if modified below
 		return  # here we should return to the previous state to try other candidates
 
 	# We haven't finished the match. We must find another one to add onto the match until we have enough
 	# Need something like CandidateStructure.run_cheap_filters(partialMatch)
-	copy_of_cs = cs.copy()
-
-	# cs.update_candidates(pm.matches)  # this modifies candidates_array
-	cs.run_cheap_filters()  # this modifies world_graph and candidates_array
+	copy_of_cs = cs.copy()  # first make a copy
+	# todo: if there's no update then do not run filters...
+	if cs.update_candidates(pm.get_last_match()):  # this modifies candidates_array
+		# only run the filters if there was any change
+		cs.run_cheap_filters()  # this modifies world_graph and candidates_array
 
 	# see if this is satisfiable
 	if not cs.check_satisfiability():
 		return
 
 	# Now we pick a good next supernode to consider candidates from
-	next_supernode = ordering.get_next_cand(pm)  # todo
+	next_supernode = ordering.get_next_cand(pm)  # todo: better order???
 	print_debug(f"The current next_supernode is: {str(next_supernode)}")
-
+	copy_of_post_filtering_cs = cs.copy()
 	# TODO: Can parallelize this for loop (mutex solution and need to duplicate pm/cs/ordering/iterator/etc.)
 	# TODO: This might be taking up a lot of memory for huge tree and because of combinations
 	# --> solution: index pointer, candidates equiv.
 	for cand in cs.get_candidates(next_supernode):  # get the candidates of our chosen supernode
+		print_debug(f"Looping with pair {(str(next_supernode), str(cand))}; currmatch {str(pm)}")
 		# cand can be a singleton or a larger subset depending on the size of the supernode.
 		# get_candidates in cs will take care of either case and return an appropriate iterator
 		# this iterator guarantees we do not
@@ -86,8 +91,9 @@ def match_subgraph(
 			# we return to get back to the top level, but before doing so, we must restore our data structure.
 			ordering.decrement_index()
 			pm.rm_last_match()
+			cs = copy_of_post_filtering_cs
 		else: 	# do we need to do anything if a candidate is not joinable?
-			pass
+			print_debug(f"{str(cand)} not joinable with {str(pm)}")
 	cs = copy_of_cs  # restore the cs before returning
 	return
 

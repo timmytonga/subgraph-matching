@@ -27,6 +27,12 @@ class PartialMatch(object):
 		last_super_node = self.node_stack.pop()
 		self.already_matched_world_nodes -= set(self.matches.pop(last_super_node).get_vertices())
 
+	def get_last_match(self) -> (SuperTemplateNode, Supernode):
+		if len(self.node_stack) == 0:
+			return None
+		last_super_node = self.node_stack[-1]
+		return last_super_node, self.matches[last_super_node]
+
 	def rm_match(self, name_of_node: SuperTemplateNode) -> None:
 		""" Given a supernode remove it from the matches
 			can be a risky method """

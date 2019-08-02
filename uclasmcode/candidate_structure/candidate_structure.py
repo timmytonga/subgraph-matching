@@ -106,14 +106,28 @@ class CandidateStructure(object):
 	# heap sorts only order but how to take into account edge information.... BFS search ordering... 
 	# 	obtain neighbor list of current node -> sort and append to order  (how to get neighbors?)
 	# ========== METHODS ==========
-	def update_candidates(self, match_dict: {SuperTemplateNode: Supernode}) -> None:
-		""" Given a match dictionary, update the candidates_array to reflect the matches"""
-		for sn, match in match_dict.items():
-			# make an np array of shape (len(sn), world.n_nodes) to all False
-			toset = (np.zeros((len(sn), self.num_world_nodes), dtype=np.bool))
-			toset[:, match.vertices] = True  # set only the matching vertices to True
-			# then set the appropriate rows and columns
-			self.candidates_array[np.ix_(sn.vertices, range(self.num_world_nodes))] = toset
+	def update_candidates(self, last_match: (SuperTemplateNode, Supernode)) -> bool:
+		""" Given a last match, update the candidates_array to reflect that last match
+		Modifies candidates_array and world_graph
+		:return: bool indicating if there was any change (True if changed, False if not changed)"""
+		if last_match is None:
+			return False
+		sn, match = last_match
+		# print_debug(f"update_candidate: candidates_array before\n{str(self.candidates_array)}")
+		# make an np array of shape (len(sn), world.n_nodes) to all False
+		toset = np.zeros((len(sn), self.num_world_nodes), dtype=np.bool)
+		toset[:, match.vertices] = True  # set only the matching vertices to True
+		# then set the appropriate rows and columns
+		no_change = np.all(self.candidates_array[np.ix_(sn.vertices, range(self.num_world_nodes))] == toset)
+		self.candidates_array[np.ix_(sn.vertices, range(self.num_world_nodes))] = toset
+		# now we get the induced subgraph
+		is_cand_any = self.candidates_array.any(axis=0)
+		# If not all world nodes are candidates for at least one template node
+		if ~is_cand_any.all():
+			# Get rid of unnecessary world nodes
+			self.world_graph = self.world_graph.subgraph(is_cand_any)
+			self.candidates_array = self.candidates_array[:, is_cand_any]
+		return not no_change  # have to not to indicate change
 
 	def run_cheap_filters(self) -> None:
 		""" Not sure if we should modify the current structure directly and store the changes
@@ -122,9 +136,10 @@ class CandidateStructure(object):
 		# TODO: Modify topology filter to take into account of edge multiplicity in supernodes
 		# TODO: Neighborhood filter for cliques (union)
 		# TODO: topology filter still slow
+		print_debug(f"Running filter in candidate structure....")
 		_, self.world_graph, self.candidates_array = uclasm.run_filters(
 			self.tmplt_graph, self.world_graph,
-			candidates=self.candidates_array, filters=uclasm.cheap_filters)
+			candidates=self.candidates_array, filters=uclasm.cheap_filters, verbose=True)
 
 	def restore_changes(self):
 		""" Not sure what this does yet but we might need to restore some changes say by the filters """
@@ -166,11 +181,11 @@ class CandidateStructure(object):
 		t2: SuperTemplateNode = m2[0]
 		c2: Supernode = m2[1]
 		if len(set(c1.vertices) & set(c2.vertices)) > 0:  # cannot have intersecting nodes!
-			print_debug(f"CandidateStructure.has_cand_edge: False because {str(c1)} and {str(c2)} has intersecting nodes.")
+			# print_debug(f"CandidateStructure.has_cand_edge: False because {str(c1)} and {str(c2)} has intersecting nodes.")
 			return False
 		multiplicity_of_super_edge = self.get_superedge_multiplicity(t1, t2, channel)
 		if multiplicity_of_super_edge == 0:
-			print_debug(f"has_cand_edge: False because no superedge between {str(t1)} and {str(t2)}.")
+			# print_debug(f"has_cand_edge: False because no superedge between {str(t1)} and {str(t2)}.")
 			return False
 		# check all edges in the world graph
 		world_matrix = self.world_graph.ch_to_adj[channel]
@@ -180,7 +195,7 @@ class CandidateStructure(object):
 			return False
 		return True  # pass all checks means True
 
-	def get_candidates(self, sn: SuperTemplateNode) -> iter:
+	def get_candidates(self, sn: SuperTemplateNode) -> [Supernode]:
 		""" Returns an iterator of candidates of a given supernode
 		Iterates through subsets of nodes for supernodes rather than permutations
 		Yields singleton for trivial supernodes """
@@ -190,6 +205,7 @@ class CandidateStructure(object):
 			cand_list = self._get_cand_list(sn)
 		else:
 			cand_list = self.non_triv_candidates[sn]
+		print_debug(f"\nGET_CANDIDATES: {str(cand_list)}")
 		for n in cand_list:
 			yield Supernode(n)
 

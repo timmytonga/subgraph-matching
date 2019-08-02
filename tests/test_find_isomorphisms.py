@@ -24,6 +24,6 @@ def test_find_isomorphism0():
 
 
 def test_find_isomorphism1():
-	sol = find_isomorphisms(cs1, False, False)
+	sol = find_isomorphisms(cs1, True, True)
 	print(sol)
 	assert sol.get_isomorphisms_count() == 4
