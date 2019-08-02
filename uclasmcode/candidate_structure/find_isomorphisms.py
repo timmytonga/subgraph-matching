@@ -77,7 +77,7 @@ def match_subgraph(
 	# TODO: This might be taking up a lot of memory for huge tree and because of combinations
 	# --> solution: index pointer, candidates equiv.
 	for cand in cs.get_candidates(next_supernode):  # get the candidates of our chosen supernode
-		print_debug(f"Looping with pair {(str(next_supernode), str(cand))}; currmatch {str(pm)}")
+		# print_debug(f"Looping with pair {(str(next_supernode), str(cand))}; currmatch {str(pm)}")
 		# cand can be a singleton or a larger subset depending on the size of the supernode.
 		# get_candidates in cs will take care of either case and return an appropriate iterator
 		# this iterator guarantees we do not
@@ -92,8 +92,6 @@ def match_subgraph(
 			ordering.decrement_index()
 			pm.rm_last_match()
 			cs = copy_of_post_filtering_cs
-		else: 	# do we need to do anything if a candidate is not joinable?
-			print_debug(f"{str(cand)} not joinable with {str(pm)}")
 	cs = copy_of_cs  # restore the cs before returning
 	return
 

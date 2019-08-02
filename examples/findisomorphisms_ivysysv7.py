@@ -30,6 +30,7 @@ cs = None
 print_info("Attempting to get cs...")
 try:
     cs = pickle.load(open("ivysysv7_candidate_structure.p", "rb"))
+    print_info("LOADED saved candidate_structure successfully!")
 except FileNotFoundError:
     print_info("\nRunning Cheap Filters")
     st = time.time()
@@ -38,11 +39,14 @@ except FileNotFoundError:
                                                   verbose=True)
     print_info("Took %f seconds to run cheap filters" % (time.time() - st))
     cs = CandidateStructure(tmplt, world, candidates, equiv_classes)
+    pickle.dump(cs, open("ivysysv7_candidate_structure.p", "wb"))
 
 
 print_info("Starting isomorphism count")
 start_time = time.time()
 sol = find_isomorphisms(cs, verbose=True, debug=True)
 
+# save our precious solution
+pickle.dump(sol, open("ivysysv7_solution_tree.p", "wb"))
 print_info("There are {} isomorphisms.".format(sol.get_isomorphisms_count()))
 print_info("Counting took {} seconds".format(time.time() - start_time))

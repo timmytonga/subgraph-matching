@@ -129,17 +129,17 @@ class CandidateStructure(object):
 			self.candidates_array = self.candidates_array[:, is_cand_any]
 		return not no_change  # have to not to indicate change
 
-	def run_cheap_filters(self) -> None:
+	def run_cheap_filters(self, verbose=False) -> None:
 		""" Not sure if we should modify the current structure directly and store the changes
 			somewhere for restore or if we should make a new structure entirely """
 		# TODO: Modify filters to only run on root node of supernodes (minor speed up??)
 		# TODO: Modify topology filter to take into account of edge multiplicity in supernodes
 		# TODO: Neighborhood filter for cliques (union)
 		# TODO: topology filter still slow
-		print_debug(f"Running filter in candidate structure....")
+		# print_debug(f"Running filter in candidate structure....")
 		_, self.world_graph, self.candidates_array = uclasm.run_filters(
 			self.tmplt_graph, self.world_graph,
-			candidates=self.candidates_array, filters=uclasm.cheap_filters, verbose=True)
+			candidates=self.candidates_array, filters=uclasm.cheap_filters, verbose=verbose)
 
 	def restore_changes(self):
 		""" Not sure what this does yet but we might need to restore some changes say by the filters """
