@@ -4,25 +4,29 @@ import datetime
 import logging
 from logging.handlers import RotatingFileHandler
 
-# setup logger
-now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-LOGFILE_NAME = '{}.log'.format("test")  # TODO: Set this to correct format when logging
-# prints log to stdout and also saves to specified log file
-logger = logging.getLogger('my_logfile')
-fh = RotatingFileHandler(LOGFILE_NAME, mode='a', maxBytes=5 * 1024 * 1024, backupCount=2, encoding=None, delay=0)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s:\n\t%(message)s')
-fh.setFormatter(formatter)
-logger.addHandler(fh)
-# ## UNCOMMENT BELOW FOR STDOUT
-# ch = logging.StreamHandler()
-# ch.setFormatter(formatter)
-# logger.addHandler(ch)
-# ##############################
-# set the logging level here
-logger.setLevel(logging.DEBUG)
-# for print message
+logger = logging.getLogger('root')
 DEBUG = True  # set this flag True to toggle DEBUG
 VERBOSE = True  # set the flag to True for verbose
+NAME = f"[{str(datetime.datetime.now().strftime('%Y-%m-%d'))}] NoName"
+
+
+def init_logger():
+	# setup logger
+	now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+	LOGFILE_NAME = '{}.log'.format(NAME)  # TODO: Set this to correct format when logging
+	# prints log to stdout and also saves to specified log file
+	fh = RotatingFileHandler(LOGFILE_NAME, mode='a', maxBytes=5 * 1024 * 1024, backupCount=2, encoding=None, delay=0)
+	formatter = logging.Formatter('%(asctime)s - %(levelname)s:\n\t%(message)s')
+	fh.setFormatter(formatter)
+	logger.addHandler(fh)
+	# ## UNCOMMENT BELOW FOR STDOUT
+	# ch = logging.StreamHandler()
+	# ch.setFormatter(formatter)
+	# logger.addHandler(ch)
+	# ##############################
+	# set the logging level here
+	# for print message
+	logger.setLevel(logging.DEBUG)
 
 
 class bcolors:
@@ -34,6 +38,11 @@ class bcolors:
 	ENDC = '\033[0m'
 	BOLD = '\033[1m'
 	UNDERLINE = '\033[4m'
+
+
+def set_name(name):
+	global NAME
+	NAME = name
 
 
 def get_now():

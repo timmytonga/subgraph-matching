@@ -58,7 +58,7 @@ def match_subgraph(
 	# Need something like CandidateStructure.run_cheap_filters(partialMatch)
 	copy_of_cs = cs.copy()
 
-	cs.update_candidates(pm.matches)  # this modifies candidates_array
+	# cs.update_candidates(pm.matches)  # this modifies candidates_array
 	cs.run_cheap_filters()  # this modifies world_graph and candidates_array
 
 	# see if this is satisfiable
