@@ -16,6 +16,6 @@ develop-eggs/
 pip-log.txt
 pip-delete-this-directory.txt
 
-__pycache__/
+**/__pycache__/
 
 

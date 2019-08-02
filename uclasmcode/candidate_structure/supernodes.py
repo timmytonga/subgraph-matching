@@ -47,7 +47,7 @@ class Supernode(object):
         return f"Supernode({self.name})"
 
     def __repr__(self):
-        return f"Vertices: {self.vertices} \t Name: {self.name}"
+        return f"Supernode{self.name} with Vertices: {self.vertices}"
 
 
 class SuperTemplateNode(Supernode):
@@ -91,4 +91,4 @@ class SuperTemplateNode(Supernode):
         return f"SuperTemplateNode{self.name}"
 
     def __repr__(self):
-        return f"SuperTemplateNode{self.vertices} with cliques: {str(self.clique_dict)}"
+        return f"SuperTemplateNode{self.name} with cliques: {str(self.clique_dict)}"

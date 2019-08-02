@@ -81,6 +81,7 @@ class Ordering(object):
         """ Gives a good ordering of the template node
         Probably use some ranking function to order the template node """
         # need to build a tuple (SuperTemplateNode, cand_count, degree)
+        # TODO: Have to taken into account of equiv classes
         cand_counts = self.cs.get_supernodes_cand_count()
         degrees = self.cs.get_supernodes_degrees()
         nbr = self.cs.get_supernodes_nbr_count()

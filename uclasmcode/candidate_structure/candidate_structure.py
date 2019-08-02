@@ -114,16 +114,9 @@ class CandidateStructure(object):
 		# then set the appropriate rows and columns
 		no_change = np.all(self.candidates_array[np.ix_(sn.vertices, range(self.num_world_nodes))] == toset)
 		self.candidates_array[np.ix_(sn.vertices, range(self.num_world_nodes))] = toset
-		# now we get the induced subgraph
-		is_cand_any = self.candidates_array.any(axis=0)
-		# If not all world nodes are candidates for at least one template node
-		if ~is_cand_any.all():
-			# Get rid of unnecessary world nodes
-			self.world_graph = self.world_graph.subgraph(is_cand_any)
-			self.candidates_array = self.candidates_array[:, is_cand_any]
-		return not no_change  # have to not to indicate change
+		return not no_change
 
-	def run_cheap_filters(self, verbose=False) -> None:
+	def run_cheap_filters(self, verbose=False) -> int:
 		""" Not sure if we should modify the current structure directly and store the changes
 			somewhere for restore or if we should make a new structure entirely """
 		# TODO: Modify filters to only run on root node of supernodes (minor speed up??)
@@ -131,9 +124,11 @@ class CandidateStructure(object):
 		# TODO: Neighborhood filter for cliques (union)
 		# TODO: topology filter still slow
 		# print_debug(f"Running filter in candidate structure....")
+		before = self.world_graph.n_nodes
 		_, self.world_graph, self.candidates_array = uclasm.run_filters(
 			self.tmplt_graph, self.world_graph,
 			candidates=self.candidates_array, filters=uclasm.cheap_filters, verbose=verbose)
+		return self.world_graph.n_nodes - before
 
 	def restore_changes(self):
 		""" Not sure what this does yet but we might need to restore some changes say by the filters """
@@ -183,8 +178,8 @@ class CandidateStructure(object):
 			return False
 		# check all edges in the world graph
 		world_matrix = self.world_graph.ch_to_adj[channel]
-		vertices_of_c1 = [self.world_graph.node_idxs[i] for i in c1.name]
-		vertices_of_c2 = [self.world_graph.node_idxs[i] for i in c2.name]
+		vertices_of_c1 = self.get_vertices_from_names(c1.name)
+		vertices_of_c2 = self.get_vertices_from_names(c2.name)
 		connection_mat = world_matrix[np.ix_(vertices_of_c1, vertices_of_c2)]
 		if not np.all((connection_mat.A >= multiplicity_of_super_edge)):
 			# each connection from c1 to c2 must be greater than or equals to the multiplicity super edge
@@ -209,9 +204,8 @@ class CandidateStructure(object):
 				idxs = self.get_vertices_from_names(n)
 				# yield Supernode(idxs, name=list(n))
 				toreturn.append(Supernode(idxs, name=list(n)))
-		print_debug(f"IN GET_CANDIDATES: result={toreturn}")
+		# print_debug(f"GET_CANDIDATES: returning {toreturn}")
 		return toreturn
-
 
 	def supernode_clique_and_cand_node_clique(self, supernode: SuperTemplateNode, cand_node: Supernode) -> bool:
 		""" Returns a bool specifying if the given cand_node satisfy the clique condition of supernode:
@@ -259,9 +253,7 @@ class CandidateStructure(object):
 	def _get_cand_list(self, sn: SuperTemplateNode) -> [str]:
 		""" Return the names of the candidates of sn"""
 		idxs = [int(i[0]) for i in np.argwhere(self.candidates_array[sn.get_root()])]
-		toreturn = self.get_names_from_vertices(idxs)
-		print_debug(f"IN _GET_CAND_LIST: supernode={sn}\t idxs={idxs}\t toreturn={toreturn}")
-		return toreturn
+		return self.get_names_from_vertices(idxs)
 
 	def in_same_equiv_class(self, t1: int, t2: int) -> bool:
 		""" Given two template nodes, return a bool specifying whether they

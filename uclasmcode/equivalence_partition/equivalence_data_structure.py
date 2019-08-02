@@ -104,7 +104,7 @@ class Equivalence(object):
             answer_map[root_of_i].add(i)
         return list(answer_map.values())
 
-    def non_trivial_classes(self) -> [{'equiv classes'}]:
+    def non_trivial_classes(self) -> [{int}]:
         """ returns a list of sets of non-trivial (>1) equivalence classes\
          (python doesn't allow set of sets)"""
         answer_map = defaultdict(set) # lookup defaultdict if not sure. just instantiate an empty set by default

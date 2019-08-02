@@ -18,14 +18,15 @@ class PartialMatch(object):
 		# dictionary of Supernode to a set of matched nodes of same size as supernode
 		# #Note that __hash__ is defined in Supernode
 		self.matches: {SuperTemplateNode: Supernode} = {}
-		self.node_stack = []  # a stack of last added SuperTemplateNodes
+		self.node_stack: [SuperTemplateNode] = []  # a stack of last added SuperTemplateNodes
 		self.already_matched_world_nodes = set()  # for checking alldiff
 
 	# ========== METHODS ===========
-	def rm_last_match(self) -> None:
+	def rm_last_match(self) -> SuperTemplateNode:
 		""" pop the last match from the stack and remove the other stuff"""
 		last_super_node = self.node_stack.pop()
 		self.already_matched_world_nodes -= set(self.matches.pop(last_super_node).name)
+		return last_super_node
 
 	def get_last_match(self) -> (SuperTemplateNode, Supernode):
 		if len(self.node_stack) == 0:
