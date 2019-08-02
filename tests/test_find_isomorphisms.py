@@ -18,6 +18,14 @@ equiv_classes1 = equivalence_partition.partition_multichannel(tmplt1.ch_to_adj)
 cs1 = CandidateStructure(tmplt1, world1, candidates1, equiv_classes1)
 
 
+# tmplts2, world2 = data.pnnl_v6()
+# tmplt2 = tmplts[0]
+# tmplt2, world2, candidates2 = uclasm.run_filters(
+# 	tmplt2, world2, filters=uclasm.cheap_filters, verbose=False)
+# equiv_classes2 = equivalence_partition.partition_multichannel(tmplt2.ch_to_adj)
+# cs2 = CandidateStructure(tmplt2, world2, candidates2, equiv_classes2)
+
+
 def test_find_isomorphism0():
 	sol = find_isomorphisms(cs, False, False)
 	assert sol.get_isomorphisms_count() == 12
@@ -25,5 +33,9 @@ def test_find_isomorphism0():
 
 def test_find_isomorphism1():
 	sol = find_isomorphisms(cs1, True, True)
-	print(sol)
 	assert sol.get_isomorphisms_count() == 4
+
+#
+# def test_find_iso_pnnlv6():
+# 	sol = find_isomorphisms(cs2)
+# 	assert sol.get_isomorphisms_count() == 1152

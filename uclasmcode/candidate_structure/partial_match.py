@@ -1,7 +1,7 @@
 """ by Tim Nguyen (7/17/19)
 PartialMatch class: Data structure for matching algorithm to modify, update, restore partial matches """
 
-from .logging_utils import print_info
+# from .logging_utils import print_info
 from .supernodes import Supernode, SuperTemplateNode
 
 
@@ -25,7 +25,7 @@ class PartialMatch(object):
 	def rm_last_match(self) -> None:
 		""" pop the last match from the stack and remove the other stuff"""
 		last_super_node = self.node_stack.pop()
-		self.already_matched_world_nodes -= set(self.matches.pop(last_super_node).get_vertices())
+		self.already_matched_world_nodes -= set(self.matches.pop(last_super_node).name)
 
 	def get_last_match(self) -> (SuperTemplateNode, Supernode):
 		if len(self.node_stack) == 0:
@@ -47,7 +47,7 @@ class PartialMatch(object):
 		# push the new matches onto the stack
 		self.node_stack.append(supernode)
 		self.matches[supernode] = candidate_node
-		self.already_matched_world_nodes.update(candidate_node.get_vertices())
+		self.already_matched_world_nodes.update(candidate_node.name)
 
 	# =========== QUERIES ==========
 	def get_matches(self) -> {SuperTemplateNode: {Supernode}}:

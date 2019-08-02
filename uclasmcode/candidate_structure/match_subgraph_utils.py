@@ -19,10 +19,11 @@ def is_joinable(
     assert supernode not in pm.matches, \
         "PartialMatch.is_joinable: Trying to join an existing match"
     assert len(candidate_node) == len(supernode), \
-        "PartialMatch.is_joinable: Trying to join a candidate_node of different length"
+        f"PartialMatch.is_joinable: Trying to join a candidate_node of different length\n" \
+            f"\t\tcandidate_node={repr(candidate_node)} and supernode={repr(supernode)}"
 
     # if the intersection is non-trivial i.e. does not satisfy the alldiff constraint
-    if set(candidate_node.vertices) & pm.already_matched_world_nodes:
+    if set(candidate_node.name) & pm.already_matched_world_nodes:
         return False
 
     # check the clique condition

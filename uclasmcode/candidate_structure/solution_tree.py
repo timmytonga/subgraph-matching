@@ -111,7 +111,7 @@ class SolutionTree(object):
 					break
 			if not child_flag:  # if there's no child, create one and set it as that for next run
 				prev_node = SolutionNode(
-					match, name=str([self.name_dict[i] for i in match.get_vertices()]),
+					match, name=str(match.name),
 					parent=prev_node)
 
 	def _increase_counter(self, match_dict: {Supernode: set}) -> None:
