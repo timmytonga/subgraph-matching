@@ -12,6 +12,7 @@ def iter_adj_pairs(tmplt, world):
         yield (tmplt_adj, world_adj)
         yield (tmplt_adj.T, world_adj.T)
 
+
 def topology_filter(tmplt, world, candidates, *,
                     changed_cands=None, **kwargs):
     """

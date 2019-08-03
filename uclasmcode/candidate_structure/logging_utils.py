@@ -51,17 +51,17 @@ def get_now():
 
 
 # ## Trivial utils
-def print_debug(msg):
+def print_debug(msg, end="\n"):
 	""" Logging and stuff """
 	if DEBUG:
 		logger.debug(msg)
-		print(f"{bcolors.WARNING}DEBUG:{bcolors.ENDC}", msg)
+		print(f"{bcolors.WARNING}DEBUG:{bcolors.ENDC}", msg, end=end)
 
 
-def print_info(msg: str):
+def print_info(msg: str, end="\n"):
 	logger.info(msg)
 	if VERBOSE:
-		print(f"{bcolors.BOLD}UPDATE:{bcolors.ENDC}", msg)
+		print(f"{bcolors.BOLD}UPDATE:{bcolors.ENDC}", msg, end=end)
 
 
 def get_dict_str(d: dict) -> str:

@@ -63,7 +63,7 @@ def count_isomorphisms(tmplt, world, *, candidates=None, verbose=True):
 
     unspec_nodes = np.where(candidates.sum(axis=1) > 1)[0]
     unspec_cover = get_node_cover(tmplt.subgraph(unspec_nodes))
-
+    print(unspec_cover)
     # Send zeros to init_changed_cands since we already just ran the filters
     return recursive_isomorphism_counter(
         tmplt, world, candidates, verbose=verbose, unspec_cover=unspec_cover,

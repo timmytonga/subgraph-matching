@@ -17,9 +17,10 @@ import numpy as np
 
 from uclasmcode.equivalence_partition.equivalence_data_structure import Equivalence
 from uclasmcode.uclasm.utils.data_structures import Graph
-from .logging_utils import print_debug
+# from .logging_utils import print_debug
 from .supernodes import Supernode, SuperTemplateNode
 from itertools import combinations  # for getting all subsets
+from uclasmcode.uclasm.filters.run_filters_cs import run_filters
 from uclasmcode import uclasm
 
 
@@ -55,7 +56,7 @@ class CandidateStructure(object):
 		return temp
 
 	@property
-	def supernodes(self) -> {SuperTemplateNode}:
+	def supernodes(self) -> {str: SuperTemplateNode}:
 		""" Return a set of SuperTemplateNodes that contains extra info than supernode like
 		clique and root"""
 		if len(self._supernodes) == 0:
@@ -123,11 +124,11 @@ class CandidateStructure(object):
 		# TODO: Modify topology filter to take into account of edge multiplicity in supernodes
 		# TODO: Neighborhood filter for cliques (union)
 		# TODO: topology filter still slow
-		# print_debug(f"Running filter in candidate structure....")
 		before = self.world_graph.n_nodes
-		_, self.world_graph, self.candidates_array = uclasm.run_filters(
+		_, self.world_graph, self.candidates_array = run_filters(
 			self.tmplt_graph, self.world_graph,
-			candidates=self.candidates_array, filters=uclasm.cheap_filters, verbose=verbose)
+			candidates=self.candidates_array, filters=uclasm.cs_filters,
+			verbose=verbose)
 		return self.world_graph.n_nodes - before
 
 	def restore_changes(self):
@@ -237,9 +238,6 @@ class CandidateStructure(object):
 		""" Returns the correct indices in the world graph given the name of world nodes"""
 		if type(name_list[0]) is tuple:
 			toreturn = [self.world_graph.node_idxs[j] for j in name_list]
-			print_debug(
-				f"\t\t IN GET_VERTICES_FROM_NAME: name_list={name_list} element's type={type(name_list[0])}"
-				f"toreturn={toreturn}")
 		else:
 			toreturn = [self.world_graph.node_idxs[i] for i in name_list]
 		return toreturn
@@ -328,7 +326,10 @@ class CandidateStructure(object):
 	def get_supernodes_cand_count(self) -> {SuperTemplateNode: int}:
 		""" Returns a dictionary of supernodes and their candidate counts
 		This time we take into account of subsets and such"""
-		return {sn: self.get_candidates_count(sn) for sn in self.supernodes.values()}
+		result = {}
+		for sn in self.supernodes.values():
+			result[sn] = self.get_candidates_count(sn) // len(sn)
+		return result
 
 	def get_supernodes_degrees(self) -> {SuperTemplateNode: int}:
 		""" Returns a dictionary of supernodes and degree """

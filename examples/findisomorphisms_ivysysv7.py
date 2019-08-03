@@ -44,7 +44,7 @@ except FileNotFoundError:
 
 print_info("Starting isomorphism count")
 start_time = time.time()
-sol = find_isomorphisms(cs, verbose=True, debug=True)
+sol = find_isomorphisms(cs, verbose=True, debug=False)
 
 # save our precious solution
 pickle.dump(sol, open("ivysysv7_solution_tree.p", "wb"))

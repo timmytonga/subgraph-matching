@@ -33,10 +33,13 @@ from .solution_tree import SolutionTree
 from .match_subgraph_utils import Ordering, is_joinable
 from .logging_utils import print_info, print_debug
 import uclasmcode.candidate_structure.logging_utils as simple_utils
-import numpy as np
+import time
 
 NUM_THREADS = 1
 STOP_FLAG = False  # a flag to stop matching
+
+total_filter_time = 0
+level = 0
 
 
 def match_subgraph(
@@ -44,44 +47,50 @@ def match_subgraph(
 		solution: SolutionTree, ordering: Ordering) -> None:
 	""" pm: dictionary of supernode and matched nodes for partial matches
 		Require a solution tree to be initialized as a global variable with name solution"""
-	# print_debug(
-	# 	f"MATCH_SUBGRAPH: Current partial match {str(pm)} and current candidates array \n"
-	# 	f"{str(cs.candidates_array)}")
+	global total_filter_time, level
 	if STOP_FLAG:  # something wants us to stop
 		return
+	print_debug(f"Current Level = {level}: ", end="")
 
 	# BASE CASE: if pm has enough matched nodes
 	if len(pm) == cs.get_supernodes_count():
 		# this means we have a matching
 		solution.add_solution(pm)
 		print_info(f"FOUND a match. Current iso count: {str(solution.get_isomorphisms_count())} ")
-		# maybe restore candidate structure here if modified below
+		level -= 1
 		return  # here we should return to the previous state to try other candidates
 
+	print_debug(f"Beginning to run update_cadidates at level {level}")
 	# We haven't finished the match. We must find another one to add onto the match until we have enough
 	# Need something like CandidateStructure.run_cheap_filters(partialMatch)
 	# todo: if there's no update then do not run filters...
 	if cs.update_candidates(pm.get_last_match()):  # this modifies candidates_array
+		st1 = time.time()
+		print_info(f"Beginning to run filters at level {level}")
 		# only run the filters if there was any change
-		num_removed = cs.run_cheap_filters()  # this modifies world_graph and candidates_array
-		print_info(f"Ran filter during tree search, removed {num_removed} world nodes")
+		num_removed = cs.run_cheap_filters(True)  # this modifies world_graph and candidates_array
+		total_filter_time += time.time() - st1
+		print_info(f"Ran filter during tree search: took {time.time() - st1}s; removed {num_removed} world nodes")
+	else:
+		print_debug("No update_candidates this level")
 
 	# see if this is satisfiable
 	if not cs.check_satisfiability():
 		# if it's unsatisfiable and we are only at the first level then we can remove it as candidate
+		level -= 1
 		return
 
 	# Now we pick a good next supernode to consider candidates from
 	next_supernode = ordering.get_next_cand(pm)  # todo: better order???
-	print_debug(f"The current next_supernode is: {str(next_supernode)}")
+	# print_debug(f"The current next_supernode is: {str(next_supernode)}")
 	# copy_of_post_filtering_cs = cs.copy()
 	# TODO: Can parallelize this for loop (mutex solution and need to duplicate pm/cs/ordering/iterator/etc.)
 	# TODO: This might be taking up a lot of memory for huge tree and because of combinations
 	# --> solution: index pointer, candidates equiv.
-	for cand in cs.get_candidates(next_supernode):  # get the candidates of our chosen supernode
-		print_debug(
-			f"Looping with pair {(str(next_supernode), repr(cand))}; currmatch {str(pm)}; "
-			f"worldnode={str(cs.world_graph.nodes)} and lenworldnode={cs.num_world_nodes}")
+	get_cand = cs.get_candidates(next_supernode)
+	print_debug(f"GET_CAND returns: {len(get_cand)} candidates")
+	for cand in get_cand:  # get the candidates of our chosen supernode
+		print_debug(f"Looping with pair {(str(next_supernode), repr(cand))};")
 		# cand can be a singleton or a larger subset depending on the size of the supernode.
 		# get_candidates in cs will take care of either case and return an appropriate iterator
 		# this iterator guarantees we do not
@@ -90,6 +99,7 @@ def match_subgraph(
 			# if we can join, we add it to the partial match and recurse until we have a full match
 			pm.add_match(supernode=next_supernode, candidate_node=cand)  # we have a bigger partial match to explore
 			ordering.increment_index()
+			level += 1
 			match_subgraph(
 				cs.copy(), pm, solution,
 				ordering)  # this recursion step guarantees we have a DFS search. This tree is huge
@@ -104,6 +114,7 @@ def match_subgraph(
 	# 			f" and \nworldnodepf={copy_of_post_filtering.world_graph.nodes}"
 	# 			f" \nworldnodecp={cs.world_graph.nodes}")
 	# cs = copy_of_cs  # restore the cs before returning
+	level -= 1
 	return
 
 
@@ -118,6 +129,8 @@ def find_isomorphisms(
 ) -> SolutionTree:
 	""" Given a cs, find all solutions and append them to a solution tree
 	for returning"""
+	global total_filter_time
+	total_filter_time = 0
 	simple_utils.VERBOSE = verbose
 	simple_utils.DEBUG = debug
 	print_info("======= BEGINNING FIND_ISOMORPHISM =====")
@@ -128,5 +141,6 @@ def find_isomorphisms(
 	partial_match = PartialMatch()
 	print_info("======= BEGIN SUBGRAPH MATCHING =======")
 	match_subgraph(candstruct.copy(), partial_match, sol, ordering)
+	print_info(f"- Total filter time: {total_filter_time}s")
 	print_info(f"====== Finished subgraph matching. Returning solution tree. =====")
 	return sol

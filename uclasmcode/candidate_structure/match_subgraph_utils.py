@@ -85,8 +85,8 @@ class Ordering(object):
         cand_counts = self.cs.get_supernodes_cand_count()
         degrees = self.cs.get_supernodes_degrees()
         nbr = self.cs.get_supernodes_nbr_count()
-        triple = [(sn, cand_counts[sn], degrees[sn], nbr[sn]) for sn in self.cs.supernodes.values()]
-        return [i[0] for i in sorted(triple, key=lambda x: (x[1], -x[2], -x[3]))]
+        triple = [(sn, cand_counts[sn], len(sn), degrees[sn], nbr[sn]) for sn in self.cs.supernodes.values()]
+        return [i[0] for i in sorted(triple, key=lambda x: (x[1], -x[2], -x[3], -x[4]))]
 
     def __str__(self):
         return str([str(i) for i in self.initial_ordering])
