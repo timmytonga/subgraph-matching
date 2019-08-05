@@ -98,7 +98,7 @@ class CandidateStructure(object):
 	def get_candidate_combination(self, sn):
 		""" Get the combinations of candidates of a supernode"""
 		candidates = self._get_cand_list(sn)
-		return list(combinations(candidates, len(sn)))
+		return combinations(candidates, len(sn))
 
 	def update_candidates(self, last_match: (SuperTemplateNode, Supernode)) -> bool:
 		""" Given a last match, update the candidates_array to reflect that last match
@@ -193,20 +193,17 @@ class CandidateStructure(object):
 		Yields singleton for trivial supernodes """
 		# IMPORTANT: must use yield for iterator.... can be complicated wrt storage
 		# TODO: Equivalent classes in world nodes
-		toreturn = []
 		if sn.is_trivial():
 			for n in self._get_cand_list(sn):  # n is a string
 				n = [n]
 				idxs = self.get_vertices_from_names(n)
 				# yield Supernode(idxs, name=n)
-				toreturn.append(Supernode(idxs, name=n))
+				yield Supernode(idxs, name=n)
 		else:  # n is not trivial
 			for n in self.get_candidate_combination(sn):  # n is a tuple
 				idxs = self.get_vertices_from_names(n)
 				# yield Supernode(idxs, name=list(n))
-				toreturn.append(Supernode(idxs, name=list(n)))
-		# print_debug(f"GET_CANDIDATES: returning {toreturn}")
-		return toreturn
+				yield Supernode(idxs, name=list(n))
 
 	def supernode_clique_and_cand_node_clique(self, supernode: SuperTemplateNode, cand_node: Supernode) -> bool:
 		""" Returns a bool specifying if the given cand_node satisfy the clique condition of supernode:
