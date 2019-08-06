@@ -90,7 +90,7 @@ def run_filters(tmplt, world, *,
 				print("after", filter.__name__,
 				      "on iteration", len(filters_so_far),
 				      "took", end_time - start_time, "seconds")
-			print_debug("filters so far: {}".format(" ".join(filters_so_far)))
+				print_debug("filters so far: {}".format(" ".join(filters_so_far)))
 
 		cand_counts_after_filter = candidates.sum(axis=1)
 

@@ -129,7 +129,8 @@ class SolutionTree(object):
 		"""
 		if self.num_isomorphisms == 0:
 			return "UNSATISFIABLE PROBLEM: NO ISOMORPHISM FOUND."
-		result = str([str(i) for i in self.template_node_ordering]) + "\n"
+		result = f"ISOMORPHISM COUNT: {self.get_isomorphisms_count()}. TEMPLATE NODES ORDER:\n"
+		result += str([str(i.name) for i in self.template_node_ordering]) + "\n"
 		for pre, _, node in RenderTree(self.root, style=DoubleStyle):
 			result += ("%s%s\n" % (pre, node.name))
 		return result

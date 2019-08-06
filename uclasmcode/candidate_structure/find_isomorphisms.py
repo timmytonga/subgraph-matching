@@ -71,11 +71,11 @@ def match_subgraph(
 	# todo: if there's no update then do not run filters...
 	if cs.update_candidates(pm.get_last_match()):  # this modifies candidates_array
 		st1 = time.time()
-		print_info(f"Beginning to run filters at level {level}")
+		print_debug(f"Beginning to run filters at level {level}")
 		# only run the filters if there was any change
 		num_removed = cs.run_cheap_filters(filter_verbose_flag)  # this modifies world_graph and candidates_array
 		total_filter_time += time.time() - st1
-		print_info(f"Ran filter during tree search: took {time.time() - st1}s; removed {num_removed} world nodes")
+		print_debug(f"Ran filter during tree search: took {time.time() - st1}s; removed {num_removed} world nodes")
 	else:
 		print_debug("No update_candidates this level")
 
@@ -110,14 +110,7 @@ def match_subgraph(
 			# if the above run correctly, we should have already explored all the branches below given a partial match
 			# we return to get back to the top level, but before doing so, we must restore our data structure.
 			ordering.decrement_index()
-			debugvalue = pm.rm_last_match()
-	# cs = copy_of_post_filtering
-	# 		print_debug(
-	# 			f"Got out of the last level with matched supernode={str(debugvalue)} and last cand={str(cand)}"
-	# 			f"len worldnode(pf) = {copy_of_post_filtering.num_world_nodes} and lenworldnode(copy)={copy_of_cs.num_world_nodes}"
-	# 			f" and \nworldnodepf={copy_of_post_filtering.world_graph.nodes}"
-	# 			f" \nworldnodecp={cs.world_graph.nodes}")
-	# cs = copy_of_cs  # restore the cs before returning
+			pm.rm_last_match()
 	level -= 1
 	return
 

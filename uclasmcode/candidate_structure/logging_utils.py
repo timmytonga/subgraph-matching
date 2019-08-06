@@ -10,7 +10,7 @@ VERBOSE = True  # set the flag to True for verbose
 NAME = f"[{str(datetime.datetime.now().strftime('%Y-%m-%d'))}] NoName"
 
 
-def init_logger():
+def init_logger(log_level=logging.INFO):
 	# setup logger
 	now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 	LOGFILE_NAME = '{}.log'.format(NAME)  # TODO: Set this to correct format when logging
@@ -26,7 +26,7 @@ def init_logger():
 	# ##############################
 	# set the logging level here
 	# for print message
-	logger.setLevel(logging.DEBUG)
+	logger.setLevel(log_level)
 
 
 class bcolors:

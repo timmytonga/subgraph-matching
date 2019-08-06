@@ -27,7 +27,6 @@ def topology_filter(tmplt, world, candidates, *,
 	changed_cands: boolean array indicating which nodes in the template have
 				   candidates that have changed since last time this ran
 	"""
-	print_debug(f"In topology filter")
 	for src_idx, dst_idx in tmplt.nbr_idx_pairs:
 		if changed_cands is not None:
 			# If neither the source nor destination has changed, there is no
@@ -41,11 +40,7 @@ def topology_filter(tmplt, world, candidates, *,
 
 		# figure out which candidates have enough edges between them in world
 		enough_edges = None
-		i = 0
 		for tmplt_adj, world_adj in iter_adj_pairs(tmplt, world):
-			print_debug(f"In channel {i}")
-			i += 1
-			print_debug("top_filter: line 49")
 			tmplt_adj_val = tmplt_adj[src_idx, dst_idx]
 
 			# if there are no edges in this channel of the template, skip it
@@ -54,29 +49,22 @@ def topology_filter(tmplt, world, candidates, *,
 
 			# sub adjacency matrix corresponding to edges from the source
 			# candidates to the destination candidates
-			print_debug("top_filter: line 57")
 			world_sub_adj = world_adj[:, dst_is_cand][src_is_cand, :]
-			print_debug("top_filter: line 59")
 			partial_enough_edges = world_sub_adj >= tmplt_adj_val
 			if enough_edges is None:
-				print_debug("top_filter: 62")
 				enough_edges = partial_enough_edges
 			else:
-				print_debug("top_filter: 65")
 				enough_edges = enough_edges * partial_enough_edges
-		print_debug("FINISHED FOR LOOP. Line 67")
 
 		# # i,j element is 1 if cands i and j have enough edges between them
 		# enough_edges = reduce(mul, enough_edges_list, 1)
 
 		# srcs with at least one reasonable dst
 		src_matches = np.count_nonzero(enough_edges, axis=1) > 0
-		print_debug("top_filter: ")
 		candidates[src_idx][src_is_cand] = src_matches
 		if not any(src_matches):
 			candidates[:, :] = False
 			break
-		print_debug("BEFORE: src_idx != dst_idx ")
 
 		if src_idx != dst_idx:
 			# dsts with at least one reasonable src
@@ -86,5 +74,4 @@ def topology_filter(tmplt, world, candidates, *,
 				candidates[:, :] = False
 				break
 
-	print_debug("Finished topology filter")
 	return tmplt, world, candidates

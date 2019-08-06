@@ -24,6 +24,11 @@ from uclasmcode.uclasm.filters.run_filters_cs import run_filters
 from uclasmcode import uclasm
 
 
+# TODO: Make new graph datastructure without using Sparse Matrices
+# TODO: Make Subgraph Matcher class for logistics
+# TODO: Implement world equivalence (and prove before)
+
+
 class CandidateStructure(object):
 	"""Contains 	supernodes: corresponding to template's nodes (with candidates)
 					superedges (between super nodes): corresponding to template's edges
@@ -38,6 +43,10 @@ class CandidateStructure(object):
 		assert len(equiv_classes) != 0, "Empty equivalent classes!"
 		self.tmplt_graph = template  # store references for important info
 		self.world_graph = world
+
+		# self.tmplt_graph.ch_to_adj_dense = {ch: adj.A for ch, adj in self.tmplt_graph.ch_to_adj.items()}
+		# self.world_graph.ch_to_adj_dense = {ch: adj.A for ch, adj in self.world_graph.ch_to_adj.items()}
+
 		self.candidates_array = candidates  # a 2D boolean array of shape (#TemplateNode, #WorldNodes) indicate candidates
 		self.equiv_classes = equiv_classes  # store the equivalent classes information to check equiv.
 
@@ -98,7 +107,7 @@ class CandidateStructure(object):
 	def get_candidate_combination(self, sn):
 		""" Get the combinations of candidates of a supernode"""
 		candidates = self._get_cand_list(sn)
-		return combinations(candidates, len(sn))
+		return combinations(candidates, len(sn))  # this is a generator
 
 	def update_candidates(self, last_match: (SuperTemplateNode, Supernode)) -> bool:
 		""" Given a last match, update the candidates_array to reflect that last match
@@ -178,11 +187,11 @@ class CandidateStructure(object):
 			# print_debug(f"has_cand_edge: False because no superedge between {str(t1)} and {str(t2)}.")
 			return False
 		# check all edges in the world graph
-		world_matrix = self.world_graph.ch_to_adj[channel]
+		world_matrix = self.world_graph.ch_to_adj[channel].A
 		vertices_of_c1 = self.get_vertices_from_names(c1.name)
 		vertices_of_c2 = self.get_vertices_from_names(c2.name)
 		connection_mat = world_matrix[np.ix_(vertices_of_c1, vertices_of_c2)]
-		if not np.all((connection_mat.A >= multiplicity_of_super_edge)):
+		if not np.all((connection_mat >= multiplicity_of_super_edge)):
 			# each connection from c1 to c2 must be greater than or equals to the multiplicity super edge
 			return False
 		return True  # pass all checks means True
@@ -197,12 +206,10 @@ class CandidateStructure(object):
 			for n in self._get_cand_list(sn):  # n is a string
 				n = [n]
 				idxs = self.get_vertices_from_names(n)
-				# yield Supernode(idxs, name=n)
 				yield Supernode(idxs, name=n)
 		else:  # n is not trivial
 			for n in self.get_candidate_combination(sn):  # n is a tuple
 				idxs = self.get_vertices_from_names(n)
-				# yield Supernode(idxs, name=list(n))
 				yield Supernode(idxs, name=list(n))
 
 	def supernode_clique_and_cand_node_clique(self, supernode: SuperTemplateNode, cand_node: Supernode) -> bool:
