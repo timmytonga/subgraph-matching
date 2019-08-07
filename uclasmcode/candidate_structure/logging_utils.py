@@ -16,7 +16,7 @@ def init_logger(log_level=logging.INFO):
 	LOGFILE_NAME = '{}.log'.format(NAME)  # TODO: Set this to correct format when logging
 	# prints log to stdout and also saves to specified log file
 	fh = RotatingFileHandler(LOGFILE_NAME, mode='w', maxBytes=500 * 1024 * 1024, backupCount=10, encoding=None, delay=0)
-	formatter = logging.Formatter('%(asctime)s - %(levelname)s:\n\t%(message)s')
+	formatter = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s')
 	fh.setFormatter(formatter)
 	logger.addHandler(fh)
 	# ## UNCOMMENT BELOW FOR STDOUT
