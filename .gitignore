@@ -12,6 +12,7 @@ dist
 build/
 lib/
 develop-eggs/
+.idea/
 
 *.egg-info/
 *.egg
