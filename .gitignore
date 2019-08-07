@@ -1,7 +1,10 @@
-**/*.log
+**/*.log*
 **/*.pyc
 **/*.p
 **/*.ipynb
+**/*.xml
+**/*.txt
+
 bin
 develop-eggs
 dist
@@ -12,6 +15,7 @@ develop-eggs/
 
 *.egg-info/
 *.egg
+
 
 pip-log.txt
 pip-delete-this-directory.txt

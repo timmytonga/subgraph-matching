@@ -44,9 +44,6 @@ class CandidateStructure(object):
 		self.tmplt_graph = template  # store references for important info
 		self.world_graph = world
 
-		# self.tmplt_graph.ch_to_adj_dense = {ch: adj.A for ch, adj in self.tmplt_graph.ch_to_adj.items()}
-		# self.world_graph.ch_to_adj_dense = {ch: adj.A for ch, adj in self.world_graph.ch_to_adj.items()}
-
 		self.candidates_array = candidates  # a 2D boolean array of shape (#TemplateNode, #WorldNodes) indicate candidates
 		self.equiv_classes = equiv_classes  # store the equivalent classes information to check equiv.
 
@@ -332,7 +329,7 @@ class CandidateStructure(object):
 		This time we take into account of subsets and such"""
 		result = {}
 		for sn in self.supernodes.values():
-			result[sn] = self.get_candidates_count(sn) // len(sn)
+			result[sn] = self.get_candidates_count(sn) 
 		return result
 
 	def get_supernodes_degrees(self) -> {SuperTemplateNode: int}:
