@@ -22,6 +22,7 @@ from .supernodes import Supernode, SuperTemplateNode
 from itertools import combinations  # for getting all subsets
 from uclasmcode.uclasm.filters.run_filters_cs import run_filters
 from uclasmcode import uclasm
+from scipy.special import comb  # to calculate number of branches
 
 
 # TODO: Make new graph datastructure without using Sparse Matrices
@@ -329,7 +330,7 @@ class CandidateStructure(object):
 		This time we take into account of subsets and such"""
 		result = {}
 		for sn in self.supernodes.values():
-			result[sn] = self.get_candidates_count(sn) 
+			result[sn] = comb(self.get_candidates_count(sn), len(sn))
 		return result
 
 	def get_supernodes_degrees(self) -> {SuperTemplateNode: int}:

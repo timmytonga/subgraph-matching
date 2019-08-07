@@ -89,14 +89,14 @@ def match_subgraph(
 
     # Now we pick a good next supernode to consider candidates from
     next_supernode = ordering.get_next_cand(pm)
-    print_info(f"Current Level = {level} and next supernode is {next_supernode.name} ")
-    # copy_of_post_filtering_cs = cs.copy()
+    print_info(f"Current Level={level}. World-size={cs.world_graph.n_nodes}. Next supernode is {next_supernode.name} with"
+               f" {cs.get_candidates_count(next_supernode)} candidates")
     # TODO: Can parallelize this for loop (mutex solution and need to duplicate pm/cs/ordering/iterator/etc.)
     # TODO: This might be taking up a lot of memory for huge tree and because of combinations
     # --> solution: index pointer, candidates equiv.
     get_cand = cs.get_candidates(next_supernode)
     for cand in get_cand:  # get the candidates of our chosen supernode
-        print_debug(f"Looping with pair {(str(next_supernode), repr(cand))};")
+        print_debug(f"Looping with pair {(str(next_supernode), str(cand))};")
         # cand can be a singleton or a larger subset depending on the size of the supernode.
         # get_candidates in cs will take care of either case and return an appropriate iterator
         # this iterator guarantees we do not

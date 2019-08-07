@@ -7,6 +7,8 @@ Utilities functions for match_subgraph function. Includes:
 from .candidate_structure import CandidateStructure, SuperTemplateNode
 from .partial_match import PartialMatch
 from .supernodes import Supernode
+import numpy as np
+from collections import deque
 from .logging_utils import print_debug
 
 
@@ -55,7 +57,8 @@ class Ordering(object):
 
     def __init__(self, cs: CandidateStructure):
         self.cs = cs
-        self.initial_ordering = self.find_good_ordering_template()
+        # self.initial_ordering = self.cand_count_ordering()
+        self.initial_ordering = self.distance_ordering()
         assert len(self.initial_ordering) == self.cs.get_supernodes_count()
         self.index = 0
 
@@ -77,19 +80,80 @@ class Ordering(object):
         # print_debug(f"Decrementing ordering index to: {self.index-1}")
         self.index -= 1
 
-    def find_good_ordering_template(self) -> [SuperTemplateNode]:
-        """ Gives a good ordering of the template node
-        Probably use some ranking function to order the template node """
-        # need to build a tuple (SuperTemplateNode, cand_count, degree)
-        # TODO: Have to taken into account of equiv classes
+    def cand_count_ordering(self) -> [SuperTemplateNode]:
+        """ Gives an ordering of the template node
+        according to the cand count"""
         cand_counts = self.cs.get_supernodes_cand_count()
         degrees = self.cs.get_supernodes_degrees()
         nbr = self.cs.get_supernodes_nbr_count()
         triple = [(sn, cand_counts[sn], len(sn), degrees[sn], nbr[sn]) for sn in self.cs.supernodes.values()]
-        return [i[0] for i in sorted(triple, key=lambda x: (x[1], -x[2], -x[3], -x[4]))]
+        sorted_triple = sorted(triple, key=lambda x: (x[1], -x[2], -x[3], -x[4]))
+        print_debug(f"CAND_COUNT ORDERING: {self._print_order_nicely2(sorted_triple)}")
+        return [i[0] for i in sorted_triple]
+
+    def distance_ordering(self) -> [SuperTemplateNode]:
+        """ Get a good start node and compute the distance of the other nodes from
+        that start node. Use that as the primary metric and we order the rest by their cand_counts"""
+        # build a list (sn, distance_from_start, cand/degree)
+        cand_counts = self.cs.get_supernodes_cand_count()
+        degrees = self.cs.get_supernodes_degrees()
+        scores = {sn: cand_counts[sn] / degrees[sn] for sn in self.cs.supernodes.values()}
+        start_node = min(scores.items(), key=lambda x: x[1])[0]
+        distances = self._get_distances_dict_from(start_node)
+        to_order = [(sn, distances[sn], scores[sn]) for sn in self.cs.supernodes.values()]
+        sorted_to_order = sorted(to_order, key=lambda x: (x[1], x[2]))
+        print_debug(f"DISTANCE ORDERING: {self._print_order_nicely(sorted_to_order)}")
+        return [i[0] for i in sorted_to_order]
 
     def __str__(self):
         return str([str(i) for i in self.initial_ordering])
+
+    def _get_neighbors(self, sn: SuperTemplateNode) -> {SuperTemplateNode}:
+        """ Returns a set of neighbors of a given supernode"""
+        root = sn.get_root()
+        nbrs = set()
+        for pin in np.argwhere(self.cs.tmplt_graph.sym_composite_adj[root]):
+            if not self.cs.in_same_equiv_class(pin[1], root):
+                nbrs.add(self.cs.get_supernode_by_idx(pin[1]))
+        return nbrs
+
+    def _get_distances_dict_from(self, sn: SuperTemplateNode) -> {SuperTemplateNode: int}:
+        """ Given a start supernode sn, returns a dictionary containing the
+        distance of the other supernodes...."""
+        assert self.cs.tmplt_graph.is_connected(), "TMPLT GRAPH NOT CONNECTED!"
+        visited = {sn}
+        result = {sn: 0}
+        queue = deque()
+        queue.append(sn)
+        distance = 0  # starting distance
+        while len(queue) != 0:
+            v = queue.popleft()
+            distance += 1
+            for nbr in self._get_neighbors(v):  # distance
+                if nbr not in visited:
+                    result[nbr] = distance
+                    visited.add(nbr)
+                    queue.append(nbr)
+        return result
+
+    @staticmethod
+    def _print_order_nicely(l: [(SuperTemplateNode, int, float)]) -> str:
+        result = "\n"
+        i = 0
+        for sn, d, score in l:
+            result += f"\t{i}.\t{sn.name}: dist={d}, score={score}\n"
+            i += 1
+        return result
+
+    @staticmethod
+    def _print_order_nicely2(l: [(SuperTemplateNode, int, int, int, int)]) -> str:
+        result = "\n"
+        i = 0
+        for sn, cand_count, lensn, degree, nbr in l:
+            result += f"\t{i}.\t{sn.name}: cand_count={cand_count}, " \
+                f"lensn={lensn}, degree={degree}, nbr={nbr}\n"
+            i += 1
+        return result
 
 
 def rank_template_node(cs: CandidateStructure, sn: SuperTemplateNode) -> int:

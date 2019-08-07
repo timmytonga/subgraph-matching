@@ -5,6 +5,8 @@ Filtering algorithms expect data to come in the form of Graph objects
 from .misc import index_map
 import scipy.sparse as sparse
 import numpy as np
+import networkx as nx
+
 
 class Graph:
     def __init__(self, nodes, channels, adjs, labels=None):
@@ -80,3 +82,8 @@ class Graph:
         return Graph(self.nodes, self.channels,
                      [adj.copy() for adj in self.adjs],
                      labels=self.labels)
+
+    def is_connected(self) -> bool:
+        """ Returns a bool indicating if this graph is connected"""
+        nxgraph = nx.from_scipy_sparse_matrix(self.sym_composite_adj)
+        return nx.is_connected(nxgraph)
