@@ -182,8 +182,9 @@ class CandidateStructure(object):
 		c1: Supernode = m1[1]
 		t2: SuperTemplateNode = m2[0]
 		c2: Supernode = m2[1]
-		if len(set(c1.vertices) & set(c2.vertices)) > 0:  # cannot have intersecting nodes!
-			# print_debug(f"CandidateStructure.has_cand_edge: False because {str(c1)} and {str(c2)} has intersecting nodes.")
+		if len(set(c1.name) & set(c2.name)) > 0:  # cannot have intersecting nodes!
+			# print_debug(f"CandidateStructure.has_cand_edge: False because {str(c1.name)} and {str(c2.name)} has intersecting nodes: "
+			#             f"{set(c1.name) & set(c2.name)}")
 			return False
 		multiplicity_of_super_edge = self.get_superedge_multiplicity(t1, t2, channel)
 		if multiplicity_of_super_edge == 0:

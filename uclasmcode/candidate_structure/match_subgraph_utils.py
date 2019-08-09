@@ -26,10 +26,12 @@ def is_joinable(
 
     # if the intersection is non-trivial i.e. does not satisfy the alldiff constraint
     if set(candidate_node.name) & pm.already_matched_world_nodes:
+        # print_debug(f"ISJOINABLE(29): FAILED ALLDIFF")
         return False
 
     # check the clique condition
     if not cs.supernode_clique_and_cand_node_clique(supernode, candidate_node):
+        # print_debug(f"ISJOINABLE(34): FAILED CLIQUE")
         return False
 
     # check the homomorphism condition
@@ -44,10 +46,12 @@ def is_joinable(
         for inbr in matched_incoming_nbr:
             if not cs.has_cand_edge(  # the order matters here because direction
                     (inbr, pm.matches[inbr]), (supernode, candidate_node), channel):
+                # print_debug(f"ISJOINABLE(49): FAILED HOMO IN {inbr.name} {channel}")
                 return False
         for onbr in matched_outgoing_nbr:
             if not cs.has_cand_edge(
                     (supernode, candidate_node), (onbr, pm.matches[onbr]), channel):
+                # print_debug(f"ISJOINABLE(29): FAILED HOMO OUT")
                 return False
     return True
 

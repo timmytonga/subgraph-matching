@@ -79,7 +79,7 @@ class SolutionTree(object):
 
 	def get_min_complete_cand_set(self):
 		""" Returns a list of sets"""
-		return [(i, j) for i, j in self.template_candidate_dict.items()]
+		return self.template_candidate_dict
 
 	# ###### METHODS #########
 	def add_solution(self, matching: PartialMatch) -> None:
