@@ -44,7 +44,7 @@ filter_verbose_flag = False
 brake = None
 
 total_filter_time = 0
-level = 0
+level = 1
 match_count = 0
 
 
@@ -60,8 +60,10 @@ def match_subgraph(
     # BASE CASE: if pm has enough matched nodes
     if len(pm) == cs.get_supernodes_count():
         # this means we have a matching
+        if solution.get_isomorphisms_count() == 0:
+            solution.set_ordering(pm.node_stack.copy())
         solution.add_solution(pm)
-        print_warning(f"FOUND a match. Current iso count: {str(solution.get_isomorphisms_count())} ")
+        print_info(f"FOUND a match. Current iso count: {str(solution.get_isomorphisms_count())} ")
         level -= 1
         if brake is not None and solution.get_isomorphisms_count() > brake:
             STOP_FLAG = True
@@ -92,34 +94,52 @@ def match_subgraph(
                f" {cand_count} candidates")
     # TODO: Can parallelize this for loop (mutex solution and need to duplicate pm/cs/ordering/iterator/etc.)
     # TODO: This might be taking up a lot of memory for huge tree and because of combinations
-    # WORLD NODE EQUIV: get the world nodes that participate in the next supernode and partition them
-    cand_vertices = Equivalence(cs.get_cand_list_idxs(next_supernode))
-    cand_vertices.partition(cs.candidate_equivalence, next_supernode)  # partition it according to the candidate equiv. relationship
-    # cand_vertices = partition_multichannel(cs.world_graph.ch_to_adj, cand_vertices)
-    print_info("new" + repr(cand_vertices))
+    # ========= WORLD NODE EQUIV: get the world nodes that participate in the next supernode and partition them ======
+    cand_vertices = None
+    if level >= cs.get_supernodes_count()-1:  # if we are at the leaf nodes
+        st1 = time.time()
+        print_debug(f"Beginning to partition candidates at level {level}")
+        cand_vertices = Equivalence(cs.get_cand_list_idxs(next_supernode))
+        cand_vertices.partition(cs.candidate_equivalence, next_supernode)  # partition candidate equiv.
+        # cand_vertices = partition_multichannel(cs.world_graph.ch_to_adj, cand_vertices)
+        print_debug(f"Partition took {time.time()-st1}s;", end="")
+        print_info(f"Level {level}: " + repr(cand_vertices))
 
-    for cand in cs.get_candidates(next_supernode):  # get the candidates of our chosen supernode
-        if STOP_FLAG:
-            level -= 1
-            return
-        print_debug(f"Level={level}({cand_count}): Looping with pair {(str(next_supernode), str(cand))};", end="")
-        # cand can be a singleton or a larger subset depending on the size of the supernode.
-        # get_candidates in cs will take care of either case and return an appropriate iterator
-        if is_joinable(pm, cs, supernode=next_supernode, candidate_node=cand):  # check
-            # if we can join, we add it to the partial match and recurse until we have a full match
-            print_debug(" and they were JOINABLE!")
-            pm.add_match(supernode=next_supernode, candidate_node=cand)  # we have a bigger partial match to explore
-            ordering.increment_index()
-            level += 1
-            match_subgraph(
-                cs.copy(), pm, solution,
-                ordering)  # this recursion step guarantees we have a DFS search. This tree is huge
-            # if the above run correctly, we should have already explored all the branches below given a partial match
-            # we return to get back to the top level, but before doing so, we must restore our data structure.
-            ordering.decrement_index()
-            pm.rm_last_match()
-        else:
-            print_debug(" and NOT JOINABLE.")
+        # if cand_vertices is not None and cs.check_equiv_candidates_overlap_with_unmatch(pm.matches, ):
+        for cand_class in cand_vertices.classes():
+            # at the leaf node we only need to check one
+            tempiter = iter(cand_class)
+            representative = [next(tempiter) for i in range(len(next_supernode))]
+            cand = cs.get_cand_node_from_idxs(representative)
+            if is_joinable(pm, cs, supernode=next_supernode, candidate_node=cand):
+                big_cand = cs.get_cand_node_from_idxs(cand_class)
+                pm.add_match(next_supernode, big_cand)
+                level += 1
+                match_subgraph(cs.copy(), pm, solution, ordering)
+                pm.rm_last_match()
+    # ===============================================================================================================
+    else:
+        for cand in cs.get_candidates(next_supernode):  # get the candidates of our chosen supernode
+            if STOP_FLAG:
+                level -= 1
+                return
+            print_debug(f"Level={level}({cand_count}): Looping with pair {(str(next_supernode), str(cand))};", end="")
+            # cand can be a singleton or a larger subset depending on the size of the supernode.
+            # get_candidates in cs will take care of either case and return an appropriate iterator
+            if is_joinable(pm, cs, supernode=next_supernode, candidate_node=cand):  # check
+                # if we can join, we add it to the partial match and recurse until we have a full match
+                print_debug(" and they were JOINABLE!")
+                pm.add_match(supernode=next_supernode, candidate_node=cand)  # we have a bigger partial match to explore
+                # ordering.increment_index()
+                level += 1
+                match_subgraph(
+                    cs.copy(), pm, solution,
+                    ordering)  # this recursion step guarantees we have a DFS search. This tree is huge
+                # we return to get back to the top level, but before doing so, we must restore our data structure.
+                # ordering.decrement_index()
+                pm.rm_last_match()
+            else:
+                print_debug(" and NOT JOINABLE.")
     level -= 1
     print_debug(f"Bottom level. Finished for loop. RETURNING to level {level}.")
     return
@@ -137,7 +157,7 @@ def find_isomorphisms(
 ) -> SolutionTree:
     """ Given a cs, find all solutions and append them to a solution tree
     for returning"""
-    global total_filter_time, verbose_flag, filter_verbose_flag, brake
+    global total_filter_time, verbose_flag, filter_verbose_flag, brake, level, match_count
     verbose_flag = verbose
     total_filter_time = 0
     filter_verbose_flag = filter_verbose
@@ -153,4 +173,6 @@ def find_isomorphisms(
     match_subgraph(candstruct.copy(), partial_match, sol, ordering)
     print_info(f"- Total filter time: {total_filter_time}s")
     print_info(f"====== Finished subgraph matching. Returning solution tree. =====")
+    level = 1  # reset level for next run
+    match_count = 0
     return sol

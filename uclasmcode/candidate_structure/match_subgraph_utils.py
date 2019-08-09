@@ -119,11 +119,12 @@ class Ordering(object):
         # build a list (sn, distance_from_start, cand/degree)
         cand_counts = self.cs.get_supernodes_cand_count()
         degrees = self.cs.get_supernodes_degrees()
-        scores = {sn: cand_counts[sn] / degrees[sn] for sn in self.cs.supernodes.values()}
+        nbr = self.cs.get_supernodes_nbr_count()
+        scores = {sn: cand_counts[sn] / nbr[sn] for sn in self.cs.supernodes.values()}
         start_node = min(scores.items(), key=lambda x: x[1])[0]
         distances = self._get_distances_dict_from(start_node)
-        to_order = [(sn, distances[sn], scores[sn], cand_counts[sn]) for sn in self.cs.supernodes.values()]
-        sorted_to_order = sorted(to_order, key=lambda x: (x[1], x[2]))
+        to_order = [(sn, distances[sn], scores[sn], cand_counts[sn], degrees[sn]) for sn in self.cs.supernodes.values()]
+        sorted_to_order = sorted(to_order, key=lambda x: (x[1], x[2], -x[4]))
         print_debug(f"DISTANCE ORDERING: {self._print_order_nicely(sorted_to_order)}")
         return [i[0] for i in sorted_to_order]
 
@@ -162,7 +163,7 @@ class Ordering(object):
     def _print_order_nicely(l: [(SuperTemplateNode, int, float)]) -> str:
         result = "\n"
         i = 0
-        for sn, d, score, cc in l:
+        for sn, d, score, cc, deg in l:
             result += f"\t{i}.\t{sn.name}: dist={d}, cand_counts={cc}, score={score}\n"
             i += 1
         return result

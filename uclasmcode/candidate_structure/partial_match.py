@@ -44,7 +44,6 @@ class PartialMatch(object):
 		""" add the new_match to the matches. """
 		assert supernode not in self.matches, "PartialMatch.add_match: Trying to add an already added node"
 		# print_info(f"Adding ({str(supernode.name)},{str(candidate_node.name)}) to {str(self)}\n")
-		assert len(supernode) == len(candidate_node), "Invalid matching: matching must be a set of equal len"
 		# push the new matches onto the stack
 		self.node_stack.append(supernode)
 		self.matches[supernode] = candidate_node

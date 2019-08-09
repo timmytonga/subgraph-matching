@@ -27,6 +27,7 @@ from .partial_match import PartialMatch
 from anytree import Node, RenderTree, DoubleStyle 		# we use the anytree library for tree
 import math 		# for factorial
 from uclasmcode.candidate_structure.logging_utils import log_solutions
+from scipy.special import comb  # for combinations
 
 
 class SolutionNode(Node):
@@ -82,6 +83,11 @@ class SolutionTree(object):
 		return self.template_candidate_dict
 
 	# ###### METHODS #########
+	def set_ordering(self, new_ordering: [SuperTemplateNode]):
+		""" This should only be set in the beginning """
+		assert self.get_isomorphisms_count() == 0, "TRYING TO CHANGE THE ORDER OF THE TREE WHEN THERE'S ALREADY A MATCH"
+		self.template_node_ordering = new_ordering
+
 	def add_solution(self, matching: PartialMatch) -> None:
 		""" This should add the matching to the main solution tree"""
 		assert len(matching) == self.num_tmplt_nodes, "Must have enough matches"
@@ -120,7 +126,7 @@ class SolutionTree(object):
 		""" Given a matching in a form of dictionary, we increase the isomorphism count appropriately"""
 		temp = 1
 		for sn, matches in match_dict.items():
-			temp *= math.factorial(len(matches))
+			temp *= math.factorial(len(sn))*comb(len(matches), len(sn))
 		self.num_isomorphisms += temp
 
 	# ### UTILITIES

@@ -310,6 +310,14 @@ class CandidateStructure(object):
 					return False
 		return True
 
+	def check_equiv_candidates_overlap_with_unmatch(
+			self, matched_supernodes: {SuperTemplateNode}, equiv_cand: Equivalence) -> bool:
+		""" Returns a bool indicating whether equiv_cand has any overlapping"""
+		big_cand = set()
+		for sn in self.supernodes.values():
+			if sn not in matched_supernodes:
+				big_cand.union(self.get_cand_list_idxs(sn))
+
 	@staticmethod
 	def _get_submatrix(matrix: np.ndarray, idx: [int]) -> np.ndarray:
 		""" Given a matrix and a list of coordinates, return the submatrix corresponding
@@ -327,6 +335,9 @@ class CandidateStructure(object):
 
 	def __str__(self):
 		return str(self.equiv_classes)  # for now
+
+	def get_cand_node_from_idxs(self, idxs: [int]) -> Supernode:
+		return Supernode(idxs, self.get_names_from_vertices(idxs))
 
 	# === NUMBER QUERIES ====
 	def get_superedge_multiplicity(self, t1: SuperTemplateNode, t2: SuperTemplateNode, channel: str) -> int:
