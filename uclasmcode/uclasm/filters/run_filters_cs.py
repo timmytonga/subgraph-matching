@@ -68,12 +68,8 @@ def run_filters(tmplt, world, *,
 		# If any template nodes have candidates that have changed since the
 		# last time this filter was run, go ahead and run the filter.
 		if np.any(changed_cands):
-			# TODO: create an object we can use like `with Timer()`
 			start_time = time.time()
-
-			# TODO: we could get rid of the `verbose` flag using a singleton
-			# logger that stores a global `verbose` property
-			print_debug("running" + str(filter.__name__))
+			# print_debug("running" + str(filter.__name__))
 
 			# Run whatever filter and the permutation filter
 			tmplt, world, candidates = filter(
@@ -116,7 +112,5 @@ def run_filters(tmplt, world, *,
 			# Get rid of unnecessary world nodes
 			world = world.subgraph(is_cand_any)
 			candidates = candidates[:, is_cand_any]
-
-	print_debug("filters are done.")
 
 	return tmplt, world, candidates

@@ -17,8 +17,7 @@ def iter_adj_pairs(tmplt, world):
 		yield (tmplt_adj.A.T, world_adj.A.T)
 
 
-def topology_filter(tmplt, world, candidates, *,
-                    changed_cands=None, **kwargs):
+def topology_filter(tmplt, world, candidates, *, changed_cands=None, **kwargs):
 	"""
 	For each pair of neighbors in the template, ensure that any candidate for
 	one neighbor has a corresponding candidate for the other neighbor to which

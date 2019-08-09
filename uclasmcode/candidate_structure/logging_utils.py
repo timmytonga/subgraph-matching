@@ -5,6 +5,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 logger = logging.getLogger('root')
+solution_logger = logging.getLogger('solution')
 DEBUG = True  # set this flag True to toggle DEBUG
 VERBOSE = True  # set the flag to True for verbose
 NAME = f"[{str(datetime.datetime.now().strftime('%Y-%m-%d'))}] NoName"
@@ -14,19 +15,16 @@ def init_logger(log_level=logging.INFO):
 	# setup logger
 	now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 	LOGFILE_NAME = '{}.log'.format(NAME)  # TODO: Set this to correct format when logging
-	# prints log to stdout and also saves to specified log file
 	fh = RotatingFileHandler(LOGFILE_NAME, mode='w', maxBytes=500 * 1024 * 1024, backupCount=10, encoding=None, delay=0)
 	formatter = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s')
 	fh.setFormatter(formatter)
 	logger.addHandler(fh)
-	# ## UNCOMMENT BELOW FOR STDOUT
-	# ch = logging.StreamHandler()
-	# ch.setFormatter(formatter)
-	# logger.addHandler(ch)
-	# ##############################
-	# set the logging level here
-	# for print message
 	logger.setLevel(log_level)
+
+	solfh = logging.FileHandler(f"{NAME}.sol")
+	solfh.setFormatter(formatter)
+	solution_logger.setLevel(logging.INFO)
+	solution_logger.addHandler(solfh)
 
 
 class bcolors:
@@ -64,6 +62,12 @@ def print_info(msg: str, end="\n"):
 		print(f"{bcolors.BOLD}UPDATE:{bcolors.ENDC}", msg, end=end)
 
 
+def print_warning(msg: str, end="\n"):
+	logger.warning(msg)
+	if VERBOSE:
+		print(f"{bcolors.FAIL}WARNING:{bcolors.ENDC}", msg, end=end)
+
+
 def get_dict_str(d: dict) -> str:
 	""" Given a dictionary, give a str output of key and value """
 	return str({str(u): str(v) for u, v in d.items()})
@@ -72,6 +76,10 @@ def get_dict_str(d: dict) -> str:
 def get_itr_str(iterable) -> str:
 	""" Given a list, set or tuple returns str of values """
 	return str([str(i) for i in iterable])
+
+
+def log_solutions(msg: str):
+	solution_logger.info(msg)
 
 
 def print_stats(partition, graph, detailed=True, name=False):

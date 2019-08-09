@@ -31,7 +31,9 @@ from .candidate_structure import CandidateStructure
 from .partial_match import PartialMatch
 from .solution_tree import SolutionTree
 from .match_subgraph_utils import Ordering, is_joinable
-from .logging_utils import print_info, print_debug
+from .logging_utils import print_info, print_debug, print_warning
+from ..equivalence_partition.equivalence_data_structure import Equivalence
+from .. equivalence_partition.multichannel_structural_equivalence import partition_multichannel
 import uclasmcode.candidate_structure.logging_utils as simple_utils
 import time
 
@@ -59,16 +61,13 @@ def match_subgraph(
     if len(pm) == cs.get_supernodes_count():
         # this means we have a matching
         solution.add_solution(pm)
-        print_info(f"FOUND a match. Current iso count: {str(solution.get_isomorphisms_count())} ")
+        print_warning(f"FOUND a match. Current iso count: {str(solution.get_isomorphisms_count())} ")
         level -= 1
         if brake is not None and solution.get_isomorphisms_count() > brake:
             STOP_FLAG = True
         return  # here we should return to the previous state to try other candidates
 
-    print_debug(f"Beginning to run update_cadidates at level {level}")
     # We haven't finished the match. We must find another one to add onto the match until we have enough
-    # Need something like CandidateStructure.run_cheap_filters(partialMatch)
-    # todo: if there's no update then do not run filters...
     if cs.update_candidates(pm.get_last_match()):  # this modifies candidates_array
         st1 = time.time()
         print_debug(f"Beginning to run filters at level {level}")
@@ -77,32 +76,38 @@ def match_subgraph(
         total_filter_time += time.time() - st1
         print_debug(f"Ran filter during tree search: took {time.time() - st1}s;")
         if num_removed != 0:
-            print_info(f"Level {level}: removed {num_removed} world nodes")
-    else:
-        print_debug("No update_candidates this level")
+            print_debug(f"Level {level}: removed {num_removed} world nodes")
 
     # see if this is satisfiable
     if not cs.check_satisfiability():
         # if it's unsatisfiable and we are only at the first level then we can remove it as candidate
         level -= 1
+        print_debug(f"NOT SATISFIABLE. RETURNING to level {level}")
         return
 
     # Now we pick a good next supernode to consider candidates from
     next_supernode = ordering.get_next_cand(pm)
-    print_info(f"Current Level={level}. World-size={cs.world_graph.n_nodes}. Next supernode is {next_supernode.name} with"
-               f" {cs.get_candidates_count(next_supernode)} candidates")
+    cand_count = cs.get_candidates_count(next_supernode)
+    print_info(f"Level={level}. World-size={cs.world_graph.n_nodes}. Next supernode is {next_supernode.name} with"
+               f" {cand_count} candidates")
     # TODO: Can parallelize this for loop (mutex solution and need to duplicate pm/cs/ordering/iterator/etc.)
     # TODO: This might be taking up a lot of memory for huge tree and because of combinations
-    # --> solution: index pointer, candidates equiv.
-    get_cand = cs.get_candidates(next_supernode)
-    for cand in get_cand:  # get the candidates of our chosen supernode
-        print_debug(f"Looping with pair {(str(next_supernode), str(cand))};")
+    # WORLD NODE EQUIV: get the world nodes that participate in the next supernode and partition them
+    cand_vertices = Equivalence(cs.get_cand_list_idxs(next_supernode))
+    cand_vertices.partition(cs.candidate_equivalence, next_supernode)  # partition it according to the candidate equiv. relationship
+    # cand_vertices = partition_multichannel(cs.world_graph.ch_to_adj, cand_vertices)
+    print_info("new" + repr(cand_vertices))
+
+    for cand in cs.get_candidates(next_supernode):  # get the candidates of our chosen supernode
+        if STOP_FLAG:
+            level -= 1
+            return
+        print_debug(f"Level={level}({cand_count}): Looping with pair {(str(next_supernode), str(cand))};", end="")
         # cand can be a singleton or a larger subset depending on the size of the supernode.
         # get_candidates in cs will take care of either case and return an appropriate iterator
-        # this iterator guarantees we do not
-        # todo: make sure is_joinable is correct when we modify cs above
         if is_joinable(pm, cs, supernode=next_supernode, candidate_node=cand):  # check
             # if we can join, we add it to the partial match and recurse until we have a full match
+            print_debug(" and they were JOINABLE!")
             pm.add_match(supernode=next_supernode, candidate_node=cand)  # we have a bigger partial match to explore
             ordering.increment_index()
             level += 1
@@ -113,7 +118,10 @@ def match_subgraph(
             # we return to get back to the top level, but before doing so, we must restore our data structure.
             ordering.decrement_index()
             pm.rm_last_match()
+        else:
+            print_debug(" and NOT JOINABLE.")
     level -= 1
+    print_debug(f"Bottom level. Finished for loop. RETURNING to level {level}.")
     return
 
 
@@ -138,7 +146,6 @@ def find_isomorphisms(
     simple_utils.DEBUG = debug
     print_info("======= BEGINNING FIND_ISOMORPHISM =====")
     ordering = Ordering(candstruct)
-    print_info(f"Initialized an initial ordering: {str(ordering)}")
     good_ordering = ordering.initial_ordering
     sol = initialize_solution_tree(good_ordering, candstruct, count_only)
     partial_match = PartialMatch()

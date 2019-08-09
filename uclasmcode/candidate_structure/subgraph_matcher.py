@@ -91,8 +91,8 @@ class SubgraphMatcher(object):
 				pm.add_match(supernode=next_supernode, candidate_node=cand)  # we have a bigger partial match to explore
 				ordering.increment_index()
 				level += 1
-				self.match_subgraph(cs.copy(), pm, solution,
-				                    ordering)  # this recursion step guarantees we have a DFS search. This tree is huge
+				self.match_subgraph(  # this recursion step guarantees we have a DFS search. This tree is huge
+					cs.copy(), pm, solution, ordering)
 				# if the above run correctly, we should have already explored all the branches below given a partial match
 				# we return to get back to the top level, but before doing so, we must restore our data structure.
 				ordering.decrement_index()

@@ -26,6 +26,7 @@ from .supernodes import Supernode, SuperTemplateNode
 from .partial_match import PartialMatch
 from anytree import Node, RenderTree, DoubleStyle 		# we use the anytree library for tree
 import math 		# for factorial
+from uclasmcode.candidate_structure.logging_utils import log_solutions
 
 
 class SolutionNode(Node):
@@ -85,6 +86,7 @@ class SolutionTree(object):
 		""" This should add the matching to the main solution tree"""
 		assert len(matching) == self.num_tmplt_nodes, "Must have enough matches"
 		match_dict = matching.get_matches()
+		log_solutions(str(matching))
 		# first we update the counter
 		self._increase_counter(match_dict)
 		# now we add the solution to the tree

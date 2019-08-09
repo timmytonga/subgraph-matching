@@ -17,7 +17,7 @@ import numpy as np
 
 from uclasmcode.equivalence_partition.equivalence_data_structure import Equivalence
 from uclasmcode.uclasm.utils.data_structures import Graph
-# from .logging_utils import print_debug
+from .logging_utils import print_debug
 from .supernodes import Supernode, SuperTemplateNode
 from itertools import combinations  # for getting all subsets
 from uclasmcode.uclasm.filters.run_filters_cs import run_filters
@@ -44,9 +44,14 @@ class CandidateStructure(object):
 		assert len(equiv_classes) != 0, "Empty equivalent classes!"
 		self.tmplt_graph = template  # store references for important info
 		self.world_graph = world
+		# self.world_graph.ch_to_adj = {
+		# 	ch: np.clip(adj.A, 0, np.amax(template.ch_to_adj[ch].A)) for ch, adj in self.world_graph.ch_to_adj.items()}
 
 		self.candidates_array = candidates  # a 2D boolean array of shape (#TemplateNode, #WorldNodes) indicate candidates
 		self.equiv_classes = equiv_classes  # store the equivalent classes information to check equiv.
+
+		# self.compressed_template_graph = self.tmplt_graph.subgraph(
+		# 	list(self.equiv_classes.root_size_map))
 
 		self.non_trivial_supernodes: {SuperTemplateNode} = set()  # a set of all the nontrivial supernodes (size >1)
 		self._supernodes = {}  # a dict storing root: SuperTemplateNode
@@ -244,6 +249,10 @@ class CandidateStructure(object):
 			toreturn = [self.world_graph.node_idxs[i] for i in name_list]
 		return toreturn
 
+	def get_vertices_from_names_t(self, name_list: [str]) -> [int]:
+		""" Returns the correct indices in the world graph given the name of world nodes"""
+		return [self.tmplt_graph.node_idxs[i] for i in name_list]
+
 	def get_names_from_vertices(self, vertices: [int]) -> [str]:
 		""" Return the name of the given indices... have to be careful"""
 		if type(vertices) is int:
@@ -254,6 +263,10 @@ class CandidateStructure(object):
 		""" Return the names of the candidates of sn"""
 		idxs = [int(i[0]) for i in np.argwhere(self.candidates_array[sn.get_root()])]
 		return self.get_names_from_vertices(idxs)
+
+	def get_cand_list_idxs(self, sn: SuperTemplateNode) -> [int]:
+		""" Returns the idxs of the world nodes' candidates of sn"""
+		return [int(i[0]) for i in np.argwhere(self.candidates_array[sn.get_root()])]
 
 	def in_same_equiv_class(self, t1: int, t2: int) -> bool:
 		""" Given two template nodes, return a bool specifying whether they
@@ -273,6 +286,28 @@ class CandidateStructure(object):
 		for ch, adj in self.tmplt_graph.ch_to_adj.items():
 			result[ch] = adj[first, second]  # 0 if not clique and number of edges otherwise
 		return result
+
+	def candidate_equivalence(self, x1, x2, u: SuperTemplateNode) -> bool:
+		""" Returns if x1 ~ x2 according to candidate equivalence
+		x1 and x2 are idxs of candidates of sn"""
+		for ch in self.channels:  # for each channel, get the world graph
+			world_graph = self.world_graph.ch_to_adj[ch].A
+			for v in self.get_incoming_neighbors(u, ch):
+				mvu = self.get_superedge_multiplicity(v, u, ch)  # multiplicity of ([v],[u]) in channel ch
+				# compute the boolean matrix of cand_edge between x_n and cand of v
+				# print_debug((self.get_cand_list_idxs(v), x1))
+				x1nbr = world_graph[np.ix_(self.get_cand_list_idxs(v), [x1])] >= mvu
+				x2nbr = world_graph[np.ix_(self.get_cand_list_idxs(v), [x2])] >= mvu
+				if not np.all(x1nbr == x2nbr):  # this makes sure same incoming neighbors
+					return False
+			for v in self.get_outgoing_neighbors(u, ch):
+				muv = self.get_superedge_multiplicity(u, v, ch)  # multiplicity of ([u],[v]) in channel ch
+				# compute the boolean matrix of cand_edge between x_n and cand of v
+				x1nbr = world_graph[np.ix_([x1], self.get_cand_list_idxs(v))] >= muv
+				x2nbr = world_graph[np.ix_([x2], self.get_cand_list_idxs(v))] >= muv
+				if not np.all(x1nbr == x2nbr):  # this makes sure same outgoing neighbors
+					return False
+		return True
 
 	@staticmethod
 	def _get_submatrix(matrix: np.ndarray, idx: [int]) -> np.ndarray:
