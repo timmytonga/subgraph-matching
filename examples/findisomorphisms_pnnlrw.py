@@ -8,9 +8,11 @@ from uclasmcode.candidate_structure import logging_utils
 import pickle  # in case we already filter
 
 d, name = data.pnnl_rw(), "pnnlrw"
+set_world_equiv_depth(1)  # warning goes off when we change to 2
+cs_cache_dir = "./cs_cached/"
 
 # setup logging
-logging_utils.set_name("pnnlrw")
+logging_utils.set_name(name)
 logging_utils.init_logger()
 
 print_info("Loading data...")
@@ -30,7 +32,7 @@ cs = None
 # the try except below is to avoid recomputing filter step.
 print_info("Attempting to get cs...")
 try:
-	cs = pickle.load(open(name + "_candidate_structure.p", "rb"))
+	cs = pickle.load(open(cs_cache_dir + name + "_candidate_structure.p", "rb"))
 	print_info("LOADED saved candidate_structure successfully!")
 except FileNotFoundError:
 	print_info("\nRunning Cheap Filters")
@@ -40,11 +42,11 @@ except FileNotFoundError:
 	                                              verbose=True)
 	print_info("Took %f seconds to run cheap filters" % (time.time() - st))
 	cs = CandidateStructure(tmplt, world, candidates, equiv_classes)
-	pickle.dump(cs, open(name + "_candidate_structure.p", "wb"))
+	pickle.dump(cs, open(cs_cache_dir + name + "_candidate_structure.p", "wb"))
 
 print_info("Starting isomorphism count")
 start_time = time.time()
-sol = find_isomorphisms(cs, verbose=True, debug=True, count_only=False, cap_iso=10**9)
+sol = find_isomorphisms(cs, verbose=True, debug=False, count_only=False, cap_iso=None)
 
 # save our precious solution
 pickle.dump(sol, open(name + "_solution_tree.p", "wb"))

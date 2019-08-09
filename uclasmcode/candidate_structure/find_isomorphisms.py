@@ -46,6 +46,7 @@ brake = None
 total_filter_time = 0
 level = 1
 match_count = 0
+WORLD_EQUIV_DEPTH = 1
 
 
 def match_subgraph(
@@ -95,18 +96,16 @@ def match_subgraph(
     # TODO: Can parallelize this for loop (mutex solution and need to duplicate pm/cs/ordering/iterator/etc.)
     # TODO: This might be taking up a lot of memory for huge tree and because of combinations
     # ========= WORLD NODE EQUIV: get the world nodes that participate in the next supernode and partition them ======
-    cand_vertices = None
-    if level >= cs.get_supernodes_count()-1:  # if we are at the leaf nodes
-        st1 = time.time()
-        print_debug(f"Beginning to partition candidates at level {level}")
+    if level >= cs.get_supernodes_count()-WORLD_EQUIV_DEPTH:  # if we are at certain level
         cand_vertices = Equivalence(cs.get_cand_list_idxs(next_supernode))
         cand_vertices.partition(cs.candidate_equivalence, next_supernode)  # partition candidate equiv.
-        # cand_vertices = partition_multichannel(cs.world_graph.ch_to_adj, cand_vertices)
-        print_debug(f"Partition took {time.time()-st1}s;", end="")
         print_info(f"Level {level}: " + repr(cand_vertices))
 
-        # if cand_vertices is not None and cs.check_equiv_candidates_overlap_with_unmatch(pm.matches, ):
+        cand_below = cs.get_candidates_of_unmatched_supernodes(pm.matches, next_supernode)
         for cand_class in cand_vertices.classes():
+            if len(cand_class & cand_below) != 0:
+                # TODO: HANDLE THIS CASE!!!!
+                print_warning(f"(level {level}) -- INTERSECTION BELOW FOR {cand_class & cand_below}")
             # at the leaf node we only need to check one
             tempiter = iter(cand_class)
             representative = [next(tempiter) for i in range(len(next_supernode))]
@@ -145,34 +144,38 @@ def match_subgraph(
     return
 
 
-def initialize_solution_tree(good_ordering, cs: CandidateStructure, count_only=False) -> SolutionTree:
-    """ Given a cs, find a good ordering of the template nodes and initialize the solution tree"""
-    sol = SolutionTree(good_ordering, cs.world_graph.nodes, count_only=count_only)
-    return sol
-
-
 def find_isomorphisms(
         candstruct: CandidateStructure, verbose=True, debug=True, count_only=False,
         filter_verbose=False, cap_iso=None, cap_matches=None
 ) -> SolutionTree:
     """ Given a cs, find all solutions and append them to a solution tree
     for returning"""
-    global total_filter_time, verbose_flag, filter_verbose_flag, brake, level, match_count
+    global STOP_FLAG, total_filter_time, verbose_flag, filter_verbose_flag, brake, level, match_count
     verbose_flag = verbose
     total_filter_time = 0
     filter_verbose_flag = filter_verbose
     brake = cap_iso
     simple_utils.VERBOSE = verbose
     simple_utils.DEBUG = debug
-    print_info("======= BEGINNING FIND_ISOMORPHISM =====")
+
+    print_info(f"======= BEGINNING FIND_ISOMORPHISM ({WORLD_EQUIV_DEPTH})=====")
     ordering = Ordering(candstruct)
     good_ordering = ordering.initial_ordering
-    sol = initialize_solution_tree(good_ordering, candstruct, count_only)
+    sol = SolutionTree(good_ordering, candstruct.world_graph.nodes, count_only=count_only)
     partial_match = PartialMatch()
+
     print_info("======= BEGIN SUBGRAPH MATCHING =======")
     match_subgraph(candstruct.copy(), partial_match, sol, ordering)
     print_info(f"- Total filter time: {total_filter_time}s")
     print_info(f"====== Finished subgraph matching. Returning solution tree. =====")
+
     level = 1  # reset level for next run
     match_count = 0
+    STOP_FLAG = False
     return sol
+
+
+def set_world_equiv_depth(d=0):
+    """ 0 means leaf node. d specifies the number of level above the leaf level"""
+    global WORLD_EQUIV_DEPTH
+    WORLD_EQUIV_DEPTH = d

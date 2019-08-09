@@ -310,13 +310,14 @@ class CandidateStructure(object):
 					return False
 		return True
 
-	def check_equiv_candidates_overlap_with_unmatch(
-			self, matched_supernodes: {SuperTemplateNode}, equiv_cand: Equivalence) -> bool:
+	def get_candidates_of_unmatched_supernodes(
+			self, matched_supernodes: {SuperTemplateNode}, curr_node: SuperTemplateNode) -> {int}:
 		""" Returns a bool indicating whether equiv_cand has any overlapping"""
 		big_cand = set()
 		for sn in self.supernodes.values():
-			if sn not in matched_supernodes:
-				big_cand.union(self.get_cand_list_idxs(sn))
+			if sn not in matched_supernodes and sn is not curr_node:
+				big_cand.update(self.get_cand_list_idxs(sn))
+		return big_cand
 
 	@staticmethod
 	def _get_submatrix(matrix: np.ndarray, idx: [int]) -> np.ndarray:

@@ -3,28 +3,35 @@
 import datetime
 import logging
 from logging.handlers import RotatingFileHandler
+import os
 
 logger = logging.getLogger('root')
 solution_logger = logging.getLogger('solution')
 DEBUG = True  # set this flag True to toggle DEBUG
 VERBOSE = True  # set the flag to True for verbose
 NAME = f"[{str(datetime.datetime.now().strftime('%Y-%m-%d'))}] NoName"
+LOG_SOLUTION = False
 
 
 def init_logger(log_level=logging.INFO):
 	# setup logger
-	now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-	LOGFILE_NAME = '{}.log'.format(NAME)  # TODO: Set this to correct format when logging
-	fh = RotatingFileHandler(LOGFILE_NAME, mode='w', maxBytes=500 * 1024 * 1024, backupCount=10, encoding=None, delay=0)
+	log_dir = os.path.join(os.path.normpath(os.getcwd()), 'logs')
+
+	# now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+	logfile_name = os.path.join(log_dir, f"{NAME}.log")
+	fh = RotatingFileHandler(logfile_name, mode='w', maxBytes=500 * 1024 * 1024, backupCount=10, encoding=None, delay=0)
 	formatter = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s')
 	fh.setFormatter(formatter)
 	logger.addHandler(fh)
 	logger.setLevel(log_level)
 
-	solfh = logging.FileHandler(f"{NAME}.sol")
-	solfh.setFormatter(formatter)
-	solution_logger.setLevel(logging.INFO)
-	solution_logger.addHandler(solfh)
+	if LOG_SOLUTION:
+		sol_dir = os.path.join(os.path.normpath(os.getcwd()), 'sols')
+		sol_name = os.path.join(sol_dir, f"{NAME}.sol")
+		solfh = logging.FileHandler(sol_name, mode='w')
+		solfh.setFormatter(formatter)
+		solution_logger.setLevel(logging.INFO)
+		solution_logger.addHandler(solfh)
 
 
 class bcolors:
@@ -41,6 +48,11 @@ class bcolors:
 def set_name(name):
 	global NAME
 	NAME = name
+
+
+def set_log_solution(on=True):
+	global LOG_SOLUTION
+	LOG_SOLUTION = on
 
 
 def get_now():
@@ -79,7 +91,8 @@ def get_itr_str(iterable) -> str:
 
 
 def log_solutions(msg: str):
-	solution_logger.info(msg)
+	if LOG_SOLUTION:
+		solution_logger.info(msg)
 
 
 def print_stats(partition, graph, detailed=True, name=False):
@@ -92,7 +105,7 @@ def print_stats(partition, graph, detailed=True, name=False):
 	print("Total number of equiv classes: " + str(len(equiv_classes)))
 	# compression percentage
 	compression_percentage = 1 - len(equiv_classes) / len(partition)
-	print("Compression percentage (1 - equiv_classes/total_number_of_nodes): %4.2f" % (compression_percentage))
+	print("Compression percentage (1 - equiv_classes/total_number_of_nodes): %4.2f" % compression_percentage)
 	equiv_classes = partition.classes()
 	equiv_classes_name = []
 	for s in equiv_classes:

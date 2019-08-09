@@ -62,7 +62,7 @@ class Ordering(object):
     def __init__(self, cs: CandidateStructure):
         self.cs = cs
         # self.distances = {sn: self._get_distances_dict_from(sn) for sn in self.cs.supernodes.values()}
-        self.initial_ordering = self.distance_ordering()
+        self.initial_ordering = self.cand_count_ordering()
         assert len(self.initial_ordering) == self.cs.get_supernodes_count()
         self.index = 0
 

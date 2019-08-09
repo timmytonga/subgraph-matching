@@ -7,14 +7,13 @@ from uclasmcode.candidate_structure.logging_utils import print_stats, print_info
 from uclasmcode.candidate_structure import logging_utils
 import pickle  # in case we already filter
 
-CAP_ISOMORPHISMS = None
 cs_cache_dir = "./cs_cached/"
-set_world_equiv_depth(2)
 
-d = data.ivysys_v7()
+d, name = data.gordian_v7(), "gordianv7"
+set_world_equiv_depth(3)
 
 # setup logging
-logging_utils.set_name("ivysys_v7")
+logging_utils.set_name(name)
 logging_utils.init_logger()
 
 print_info("Loading data...")
@@ -31,27 +30,26 @@ print_info("Took %f seconds to partition and make cs" % (time.time() - st))
 print_stats(equiv_classes, tmplt)
 
 cs = None
+# the try except below is to avoid recomputing filter step.
 print_info("Attempting to get cs...")
 try:
-    cs = pickle.load(open(cs_cache_dir+"ivysysv7_candidate_structure.p", "rb"))
-    print_info("LOADED saved candidate_structure successfully!")
+	cs = pickle.load(open(cs_cache_dir + name + "_candidate_structure.p", "rb"))
+	print_info("LOADED saved candidate_structure successfully!")
 except FileNotFoundError:
-    print_info("\nRunning Cheap Filters")
-    st = time.time()
-    tmplt, world, candidates = uclasm.run_filters(tmplt, world,
-                                                  filters=uclasm.cheap_filters,
-                                                  verbose=True)
-    print_info("Took %f seconds to run cheap filters" % (time.time() - st))
-    cs = CandidateStructure(tmplt, world, candidates, equiv_classes)
-    pickle.dump(cs, open(cs_cache_dir+"ivysysv7_candidate_structure.p", "wb"))
-
+	print_info("\nRunning Cheap Filters")
+	st = time.time()
+	tmplt, world, candidates = uclasm.run_filters(tmplt, world,
+	                                              filters=uclasm.cheap_filters,
+	                                              verbose=True)
+	print_info("Took %f seconds to run cheap filters" % (time.time() - st))
+	cs = CandidateStructure(tmplt, world, candidates, equiv_classes)
+	pickle.dump(cs, open(cs_cache_dir + name + "_candidate_structure.p", "wb"))
 
 print_info("Starting isomorphism count")
 start_time = time.time()
-sol = find_isomorphisms(
-    cs, verbose=True, debug=False, count_only=False, filter_verbose=False, cap_iso=CAP_ISOMORPHISMS)
+sol = find_isomorphisms(cs, verbose=True, debug=False, count_only=False, cap_iso=None)
 
 # save our precious solution
-pickle.dump(sol, open("ivysysv7_solution_tree.p", "wb"))
+pickle.dump(sol, open("./solution_tree/" + name + "_solution_tree.p", "wb"))
 print_info("There are {} isomorphisms.".format(sol.get_isomorphisms_count()))
 print_info("Counting took {} seconds".format(time.time() - start_time))

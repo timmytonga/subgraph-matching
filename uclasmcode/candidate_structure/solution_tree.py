@@ -63,6 +63,7 @@ class SolutionTree(object):
 		self.num_tmplt_nodes = len(self.template_node_ordering)
 		self.name_dict = name_dict  # this is world.node_idxs
 		self.count_only = count_only
+		self.match_count = 0
 
 	# ###### QUERIES #########
 	def print_tree(self):  # nice fancy function from library
@@ -73,6 +74,9 @@ class SolutionTree(object):
 
 	def get_isomorphisms_count(self):
 		return self.num_isomorphisms
+
+	def get_num_matches(self):
+		return self.match_count
 
 	def get_signal_nodes(self):
 		""" returns a set of signal nodes """
@@ -125,6 +129,7 @@ class SolutionTree(object):
 	def _increase_counter(self, match_dict: {Supernode: set}) -> None:
 		""" Given a matching in a form of dictionary, we increase the isomorphism count appropriately"""
 		temp = 1
+		self.match_count += 1
 		for sn, matches in match_dict.items():
 			temp *= math.factorial(len(sn))*comb(len(matches), len(sn))
 		self.num_isomorphisms += temp
