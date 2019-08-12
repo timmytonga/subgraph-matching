@@ -17,12 +17,12 @@ import time
 
 NUM_THREADS = 1
 STOP_FLAG = False  # a flag to stop matching
-verbose_flag = False
+VERBOSE_FLAG = False
 filter_verbose_flag = False
-brake = None
+BRAKE = None
 
 total_filter_time = 0
-level = 0
+LEVEL = 0
 match_count = 0
 
 
@@ -38,7 +38,7 @@ class SubgraphMatcher(object):
 			solution: SolutionTree, ordering: Ordering) -> None:
 		""" pm: dictionary of supernode and matched nodes for partial matches
 			Require a solution tree to be initialized as a global variable with name solution"""
-		global total_filter_time, level, STOP_FLAG
+		global total_filter_time, LEVEL, STOP_FLAG
 		if STOP_FLAG:  # something wants us to stop
 			return
 
@@ -48,7 +48,7 @@ class SubgraphMatcher(object):
 			solution.add_solution(pm)
 			print_info(f"FOUND a match. Current iso count: {str(solution.get_isomorphisms_count())} ")
 			level -= 1
-			if brake is not None and solution.get_isomorphisms_count() > brake:
+			if BRAKE is not None and solution.get_isomorphisms_count() > BRAKE:
 				STOP_FLAG = True
 			return  # here we should return to the previous state to try other candidates
 
@@ -113,7 +113,7 @@ def find_isomorphisms(
 ) -> SolutionTree:
 	""" Given a cs, find all solutions and append them to a solution tree
 	for returning"""
-	global total_filter_time, verbose_flag, filter_verbose_flag, brake
+	global total_filter_time, VERBOSE_FLAG, filter_verbose_flag, BRAKE
 	verbose_flag = verbose
 	total_filter_time = 0
 	filter_verbose_flag = filter_verbose
