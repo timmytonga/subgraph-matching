@@ -8,6 +8,7 @@ from functools import reduce
 # TODO: count how many isomorphisms each background node participates in.
 # TODO: switch from recursive to iterative implementation for readability
 
+
 def recursive_isomorphism_counter(tmplt, world, candidates, *,
                                   unspec_cover, verbose, init_changed_cands):
     # If the node cover is empty, the unspec nodes are disconnected. Thus, we
@@ -20,7 +21,7 @@ def recursive_isomorphism_counter(tmplt, world, candidates, *,
                          for idx, node in enumerate(tmplt.nodes)}
         return count_alldiffs(node_to_cands)
 
-    _, world, candidates = run_filters(tmplt, world, candidates=candidates, filters=all_filters,
+    _, world, candidates = run_filters(tmplt, world, candidates=candidates, filters=cheap_filters,
                 verbose=False, init_changed_cands=init_changed_cands)
 
     # Since the node cover is not empty, we first choose some valid

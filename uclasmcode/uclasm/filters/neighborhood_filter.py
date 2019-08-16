@@ -8,6 +8,7 @@ import time
 # TODO: come up with terminology for "star neighborhood"
 # TODO: utilize `changed_cands`
 
+
 def get_edge_seqs(graph, channels=None, nodes=None):
     if channels is None:
         channels = graph.ch_to_adj.keys()
@@ -24,6 +25,7 @@ def get_edge_seqs(graph, channels=None, nodes=None):
         edge_seqs[node_idx] = sparse.vstack(seq_list, format="csr")
 
     return edge_seqs
+
 
 def neighborhood_filter(tmplt, world, candidates, *,
                         changed_cands=None, **kwargs):

@@ -129,7 +129,7 @@ class CandidateStructure(object):
 		self.candidates_array[np.ix_(sn.vertices, range(self.num_world_nodes))] = toset
 		return not no_change
 
-	def run_cheap_filters(self, verbose=False) -> int:
+	def run_cheap_filters(self, verbose=False, cheap_only=True) -> int:
 		""" Not sure if we should modify the current structure directly and store the changes
 			somewhere for restore or if we should make a new structure entirely """
 		# TODO: Modify filters to only run on root node of supernodes (minor speed up??)

@@ -33,9 +33,9 @@ from .solution_tree import SolutionTree
 from .match_subgraph_utils import Ordering, is_joinable
 from .logging_utils import print_info, print_debug, print_warning
 from ..equivalence_partition.equivalence_data_structure import Equivalence
-from .. equivalence_partition.multichannel_structural_equivalence import partition_multichannel
 import uclasmcode.candidate_structure.logging_utils as simple_utils
 import time
+import threading
 
 NUM_THREADS = 1
 STOP_FLAG = False  # a flag to stop matching
@@ -129,13 +129,10 @@ def match_subgraph(
                 # if we can join, we add it to the partial match and recurse until we have a full match
                 print_debug(" and they were JOINABLE!")
                 pm.add_match(supernode=next_supernode, candidate_node=cand)  # we have a bigger partial match to explore
-                # ordering.increment_index()
                 LEVEL += 1
                 match_subgraph(
                     cs.copy(), pm, solution,
                     ordering)  # this recursion step guarantees we have a DFS search. This tree is huge
-                # we return to get back to the top level, but before doing so, we must restore our data structure.
-                # ordering.decrement_index()
                 pm.rm_last_match()
             else:
                 print_debug(" and NOT JOINABLE.")
@@ -146,10 +143,17 @@ def match_subgraph(
 
 def find_isomorphisms(
         candstruct: CandidateStructure, verbose=True, debug=True, count_only=False,
-        filter_verbose=False, cap_iso=None, cap_matches=None
+        filter_verbose=False, cap_iso=None, timeout=None, cap_matches=None
 ) -> SolutionTree:
     """ Given a cs, find all solutions and append them to a solution tree
-    for returning"""
+    for returning. Options:
+    - verbose, debug, filter_verbose: show appropriate messages
+    - count_only: IMPORTANT! Store only count or the entire solution tree. Turn this on for dataset with huge solution
+        tree to save memory
+    - cap_iso: stop the algorithm after these many isomorphisms
+    - timeout: stop the algorithm after <timeout> seconds. Default is None
+    - cap_matches: stop after certain number of matches (disregarding combinations and permutations)
+    """
     global STOP_FLAG, total_filter_time, VERBOSE_FLAG, filter_verbose_flag, BRAKE, LEVEL, match_count
     VERBOSE_FLAG = verbose
     total_filter_time = 0
@@ -165,6 +169,8 @@ def find_isomorphisms(
     partial_match = PartialMatch()
 
     print_info("======= BEGIN SUBGRAPH MATCHING =======")
+    if timeout is not None:
+        threading.Timer(timeout, timeout_thread_function).start()
     match_subgraph(candstruct.copy(), partial_match, sol, ordering)
     print_info(f"- Total filter time: {total_filter_time}s")
     print_info(f"====== Finished subgraph matching. Returning solution tree. =====")
@@ -173,3 +179,9 @@ def find_isomorphisms(
     match_count = 0
     STOP_FLAG = False
     return sol
+
+
+def timeout_thread_function():
+    print_info("Timed out by user!")
+    global STOP_FLAG
+    STOP_FLAG = True

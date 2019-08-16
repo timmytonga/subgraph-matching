@@ -9,7 +9,6 @@ import pickle  # in case we already filter
 
 CAP_ISOMORPHISMS = None
 cs_cache_dir = "./cs_cached/"
-set_world_equiv_depth(2)
 
 d = data.ivysys_v7()
 
