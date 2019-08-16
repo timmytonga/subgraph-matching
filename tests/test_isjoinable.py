@@ -1,7 +1,6 @@
 import pytest
 
 from uclasmcode import equivalence_partition
-from uclasmcode import uclasm
 from uclasmcode.candidate_structure.candidate_structure import *
 from uclasmcode.candidate_structure.match_subgraph_utils import is_joinable
 from uclasmcode.candidate_structure.partial_match import *

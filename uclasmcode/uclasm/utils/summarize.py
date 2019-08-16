@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def summarize(tmplt, world, candidates, alert_missing=True):
     cand_counts = candidates.sum(axis=1)
 

@@ -7,6 +7,7 @@ from ..utils import summarize
 
 # TODO: logging
 
+
 def run_filters(tmplt, world, *,
                 candidates=None,
                 filters=None,

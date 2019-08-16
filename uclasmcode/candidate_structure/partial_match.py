@@ -1,7 +1,7 @@
 """ by Tim Nguyen (7/17/19)
 PartialMatch class: Data structure for matching algorithm to modify, update, restore partial matches """
 
-from .simple_utils import print_info
+# from .logging_utils import print_info
 from .supernodes import Supernode, SuperTemplateNode
 
 
@@ -18,14 +18,21 @@ class PartialMatch(object):
 		# dictionary of Supernode to a set of matched nodes of same size as supernode
 		# #Note that __hash__ is defined in Supernode
 		self.matches: {SuperTemplateNode: Supernode} = {}
-		self.node_stack = []  # a stack of last added SuperTemplateNodes
+		self.node_stack: [SuperTemplateNode] = []  # a stack of last added SuperTemplateNodes
 		self.already_matched_world_nodes = set()  # for checking alldiff
 
 	# ========== METHODS ===========
-	def rm_last_match(self) -> None:
+	def rm_last_match(self) -> SuperTemplateNode:
 		""" pop the last match from the stack and remove the other stuff"""
 		last_super_node = self.node_stack.pop()
-		self.already_matched_world_nodes -= set(self.matches.pop(last_super_node).get_vertices())
+		self.already_matched_world_nodes -= set(self.matches.pop(last_super_node).name)
+		return last_super_node
+
+	def get_last_match(self) -> (SuperTemplateNode, Supernode):
+		if len(self.node_stack) == 0:
+			return None
+		last_super_node = self.node_stack[-1]
+		return last_super_node, self.matches[last_super_node]
 
 	def rm_match(self, name_of_node: SuperTemplateNode) -> None:
 		""" Given a supernode remove it from the matches
@@ -37,11 +44,10 @@ class PartialMatch(object):
 		""" add the new_match to the matches. """
 		assert supernode not in self.matches, "PartialMatch.add_match: Trying to add an already added node"
 		# print_info(f"Adding ({str(supernode.name)},{str(candidate_node.name)}) to {str(self)}\n")
-		assert len(supernode) == len(candidate_node), "Invalid matching: matching must be a set of equal len"
 		# push the new matches onto the stack
 		self.node_stack.append(supernode)
 		self.matches[supernode] = candidate_node
-		self.already_matched_world_nodes.update(candidate_node.get_vertices())
+		self.already_matched_world_nodes.update(candidate_node.name)
 
 	# =========== QUERIES ==========
 	def get_matches(self) -> {SuperTemplateNode: {Supernode}}:

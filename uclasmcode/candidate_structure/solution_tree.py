@@ -26,6 +26,8 @@ from .supernodes import Supernode, SuperTemplateNode
 from .partial_match import PartialMatch
 from anytree import Node, RenderTree, DoubleStyle 		# we use the anytree library for tree
 import math 		# for factorial
+from uclasmcode.candidate_structure.logging_utils import log_solutions
+from scipy.special import comb  # for combinations
 
 
 class SolutionNode(Node):
@@ -50,7 +52,7 @@ class SolutionTree(object):
 	This class also provides queries to obtain other information about the solution space of related problems
 	"""
 
-	def __init__(self, ordering: [SuperTemplateNode], name_dict: {int: str} = None):
+	def __init__(self, ordering: [SuperTemplateNode], name_dict: {int: str} = None, count_only=False):
 		""" ordering specifies an ordering of the template nodes in form of a list
 		ideally should be to minimize the width of the tree """
 		self.root = SolutionNode(name="root") 	# this is the main tree
@@ -60,6 +62,8 @@ class SolutionTree(object):
 		self.template_node_ordering = ordering
 		self.num_tmplt_nodes = len(self.template_node_ordering)
 		self.name_dict = name_dict  # this is world.node_idxs
+		self.count_only = count_only
+		self.match_count = 0
 
 	# ###### QUERIES #########
 	def print_tree(self):  # nice fancy function from library
@@ -71,23 +75,33 @@ class SolutionTree(object):
 	def get_isomorphisms_count(self):
 		return self.num_isomorphisms
 
+	def get_num_matches(self):
+		return self.match_count
+
 	def get_signal_nodes(self):
 		""" returns a set of signal nodes """
 		return set.union(*list(self.template_candidate_dict.values()))
 
 	def get_min_complete_cand_set(self):
 		""" Returns a list of sets"""
-		return [(i, j) for i, j in self.template_candidate_dict.items()]
+		return self.template_candidate_dict
 
 	# ###### METHODS #########
+	def set_ordering(self, new_ordering: [SuperTemplateNode]):
+		""" This should only be set in the beginning """
+		assert self.get_isomorphisms_count() == 0, "TRYING TO CHANGE THE ORDER OF THE TREE WHEN THERE'S ALREADY A MATCH"
+		self.template_node_ordering = new_ordering
+
 	def add_solution(self, matching: PartialMatch) -> None:
 		""" This should add the matching to the main solution tree"""
 		assert len(matching) == self.num_tmplt_nodes, "Must have enough matches"
 		match_dict = matching.get_matches()
+		log_solutions(str(matching))
 		# first we update the counter
 		self._increase_counter(match_dict)
 		# now we add the solution to the tree
-		self._append_to_tree(match_dict)
+		if not self.count_only:
+			self._append_to_tree(match_dict)
 
 	# # PRIVATE
 	def _append_to_tree(self, match_dict: {SuperTemplateNode: Supernode}) -> None:
@@ -109,14 +123,15 @@ class SolutionTree(object):
 					break
 			if not child_flag:  # if there's no child, create one and set it as that for next run
 				prev_node = SolutionNode(
-					match, name=str([self.name_dict[i] for i in match.get_vertices()]),
+					match, name=str(match.name),
 					parent=prev_node)
 
 	def _increase_counter(self, match_dict: {Supernode: set}) -> None:
 		""" Given a matching in a form of dictionary, we increase the isomorphism count appropriately"""
 		temp = 1
+		self.match_count += 1
 		for sn, matches in match_dict.items():
-			temp *= math.factorial(len(matches))
+			temp *= math.factorial(len(sn))*comb(len(matches), len(sn))
 		self.num_isomorphisms += temp
 
 	# ### UTILITIES
@@ -127,7 +142,8 @@ class SolutionTree(object):
 		"""
 		if self.num_isomorphisms == 0:
 			return "UNSATISFIABLE PROBLEM: NO ISOMORPHISM FOUND."
-		result = str([str(i) for i in self.template_node_ordering]) + "\n"
+		result = f"ISOMORPHISM COUNT: {self.get_isomorphisms_count()}. TEMPLATE NODES ORDER:\n"
+		result += str([str(i.name) for i in self.template_node_ordering]) + "\n"
 		for pre, _, node in RenderTree(self.root, style=DoubleStyle):
 			result += ("%s%s\n" % (pre, node.name))
 		return result

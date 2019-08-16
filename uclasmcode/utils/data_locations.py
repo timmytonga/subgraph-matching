@@ -114,7 +114,7 @@ class NetFileGetter:
             self.data_root = "/s1/scr/reu_data2/darpa_maa/data/"
 
         if self.ta1_team == "TIM":  # local for now
-            self.data_root= "/Users/thiennguyen/reu-subgraph-matching/Tims-DARPA/data"
+            self.data_root = "/s2/scr/reu_data/darpa_maa/tim/subgraph-matching/data/"
 
         self.net_dir = get_data_dir(self.data_root,
                                     ta1_team=self.ta1_team,

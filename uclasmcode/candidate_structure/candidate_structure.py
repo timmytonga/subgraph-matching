@@ -17,9 +17,17 @@ import numpy as np
 
 from uclasmcode.equivalence_partition.equivalence_data_structure import Equivalence
 from uclasmcode.uclasm.utils.data_structures import Graph
-from .simple_utils import print_debug
+from .logging_utils import print_debug
 from .supernodes import Supernode, SuperTemplateNode
 from itertools import combinations  # for getting all subsets
+from uclasmcode.uclasm.filters.run_filters_cs import run_filters
+from uclasmcode import uclasm
+from scipy.special import comb  # to calculate number of branches
+
+
+# TODO: Make new graph datastructure without using Sparse Matrices
+# TODO: Make Subgraph Matcher class for logistics
+# TODO: Implement world equivalence (and prove before)
 
 
 class CandidateStructure(object):
@@ -36,13 +44,19 @@ class CandidateStructure(object):
 		assert len(equiv_classes) != 0, "Empty equivalent classes!"
 		self.tmplt_graph = template  # store references for important info
 		self.world_graph = world
+		# self.world_graph.ch_to_adj = {
+		# 	ch: np.clip(adj.A, 0, np.amax(template.ch_to_adj[ch].A)) for ch, adj in self.world_graph.ch_to_adj.items()}
+
 		self.candidates_array = candidates  # a 2D boolean array of shape (#TemplateNode, #WorldNodes) indicate candidates
 		self.equiv_classes = equiv_classes  # store the equivalent classes information to check equiv.
+
+		# self.compressed_template_graph = self.tmplt_graph.subgraph(
+		# 	list(self.equiv_classes.root_size_map))
 
 		self.non_trivial_supernodes: {SuperTemplateNode} = set()  # a set of all the nontrivial supernodes (size >1)
 		self._supernodes = {}  # a dict storing root: SuperTemplateNode
 		# a dict storing the candidates (subsets) of nontrivial supernodes.
-		self._non_triv_candidates: {SuperTemplateNode: [Supernode]} = {}
+		self._equiv_size_array = []
 
 	def copy(self):
 		""" We need to copy the world_graph since tmplt is never modified """
@@ -51,21 +65,10 @@ class CandidateStructure(object):
 			self.candidates_array.copy(), self.equiv_classes)
 		temp._supernodes = self._supernodes
 		temp.non_trivial_supernodes = self.non_trivial_supernodes
-		temp._non_triv_candidates = self._non_triv_candidates.copy()
 		return temp
 
 	@property
-	def non_triv_candidates(self) -> {SuperTemplateNode: [Supernode]}:
-		""" Dictionary of non trivial supernodes with list of subsets of possible candidates"""
-		if len(self._non_triv_candidates) == 0:
-			assert len(self.non_trivial_supernodes) != 0, "Supernodes haven't been initialized"
-			for sn in self.non_trivial_supernodes:  # this has potential to be empty
-				candidates = self._get_cand_list(sn)  # this is a list of idxs of candidates
-				self._non_triv_candidates[sn] = list(combinations(candidates, len(sn)))
-		return self._non_triv_candidates
-
-	@property
-	def supernodes(self) -> {SuperTemplateNode}:
+	def supernodes(self) -> {str: SuperTemplateNode}:
 		""" Return a set of SuperTemplateNodes that contains extra info than supernode like
 		clique and root"""
 		if len(self._supernodes) == 0:
@@ -73,7 +76,7 @@ class CandidateStructure(object):
 				root = self.equiv_classes.compress_to_root(next(iter(ec)))
 				temp = (SuperTemplateNode(
 					ec, self._get_equiv_class_clique_dict(ec),
-					name=str([self.tmplt_graph.nodes[i] for i in ec]),
+					name=[self.tmplt_graph.nodes[i] for i in ec],
 					root=root))
 				self._supernodes[root] = temp
 				if len(ec) > 1:
@@ -84,14 +87,61 @@ class CandidateStructure(object):
 	def channels(self):
 		return self.tmplt_graph.channels
 
+	@property
+	def num_world_nodes(self):
+		return self.world_graph.n_nodes
+
+	@property
+	def equiv_size_array(self):
+		"""
+		:return: An array of shape tmplt node that contains the size of equiv classes
+		"""
+		if len(self._equiv_size_array) == 0:
+			self._equiv_size_array = np.array(
+				[self.equiv_classes.root_size_map[self.equiv_classes.compress_to_root(i)] for i in
+				 range(self.tmplt_graph.n_nodes)]
+			)
+		return self._equiv_size_array
+
 	# matching algorithm should have some good ordering to follow candidate-edges
 	# heap sorts only order but how to take into account edge information.... BFS search ordering... 
 	# 	obtain neighbor list of current node -> sort and append to order  (how to get neighbors?)
 	# ========== METHODS ==========
-	def run_cheap_filters(self, partial_match) -> "Some sort of ways to rep. candidates":
+	def get_candidate_combination(self, sn):
+		""" Get the combinations of candidates of a supernode"""
+		candidates = self._get_cand_list(sn)
+		return combinations(candidates, len(sn))  # this is a generator
+
+	def update_candidates(self, last_match: (SuperTemplateNode, Supernode)) -> bool:
+		""" Given a last match, update the candidates_array to reflect that last match
+		Modifies candidates_array and world_graph
+		:return: bool indicating if there was any change (True if changed, False if not changed)"""
+		if last_match is None:
+			return False
+		sn, match = last_match
+		# print_debug(f"update_candidate: candidates_array before\n{str(self.candidates_array)}")
+		# make an np array of shape (len(sn), world.n_nodes) to all False
+		toset = np.zeros((len(sn), self.num_world_nodes), dtype=np.bool)
+		world_idx = self.get_vertices_from_names(match.name)
+		toset[:, world_idx] = True  # set only the matching vertices to True
+		# then set the appropriate rows and columns
+		no_change = np.all(self.candidates_array[np.ix_(sn.vertices, range(self.num_world_nodes))] == toset)
+		self.candidates_array[np.ix_(sn.vertices, range(self.num_world_nodes))] = toset
+		return not no_change
+
+	def run_cheap_filters(self, verbose=False, cheap_only=True) -> int:
 		""" Not sure if we should modify the current structure directly and store the changes
 			somewhere for restore or if we should make a new structure entirely """
-		pass
+		# TODO: Modify filters to only run on root node of supernodes (minor speed up??)
+		# TODO: Modify topology filter to take into account of edge multiplicity in supernodes
+		# TODO: Neighborhood filter for cliques (union)
+		# TODO: topology filter still slow
+		before = self.world_graph.n_nodes
+		_, self.world_graph, self.candidates_array = run_filters(
+			self.tmplt_graph, self.world_graph,
+			candidates=self.candidates_array, filters=uclasm.cs_filters,
+			verbose=verbose)
+		return self.world_graph.n_nodes - before
 
 	def restore_changes(self):
 		""" Not sure what this does yet but we might need to restore some changes say by the filters """
@@ -132,61 +182,39 @@ class CandidateStructure(object):
 		c1: Supernode = m1[1]
 		t2: SuperTemplateNode = m2[0]
 		c2: Supernode = m2[1]
-		if len(set(c1.vertices) & set(c2.vertices)) > 0:  # cannot have intersecting nodes!
-			print_debug(f"CandidateStructure.has_cand_edge: False because {str(c1)} and {str(c2)} has intersecting nodes.")
+		if len(set(c1.name) & set(c2.name)) > 0:  # cannot have intersecting nodes!
+			# print_debug(f"CandidateStructure.has_cand_edge: False because {str(c1.name)} and {str(c2.name)} has intersecting nodes: "
+			#             f"{set(c1.name) & set(c2.name)}")
 			return False
 		multiplicity_of_super_edge = self.get_superedge_multiplicity(t1, t2, channel)
 		if multiplicity_of_super_edge == 0:
-			print_debug(f"has_cand_edge: False because no superedge between {str(t1)} and {str(t2)}.")
+			# print_debug(f"has_cand_edge: False because no superedge between {str(t1)} and {str(t2)}.")
 			return False
 		# check all edges in the world graph
-		world_matrix = self.world_graph.ch_to_adj[channel]
-		connection_mat = world_matrix[np.ix_(c1.get_vertices(), c2.get_vertices())]
-		if not np.all((connection_mat.A >= multiplicity_of_super_edge)):
+		world_matrix = self.world_graph.ch_to_adj[channel].A
+		vertices_of_c1 = self.get_vertices_from_names(c1.name)
+		vertices_of_c2 = self.get_vertices_from_names(c2.name)
+		connection_mat = world_matrix[np.ix_(vertices_of_c1, vertices_of_c2)]
+		if not np.all((connection_mat >= multiplicity_of_super_edge)):
 			# each connection from c1 to c2 must be greater than or equals to the multiplicity super edge
 			return False
 		return True  # pass all checks means True
 
-	def get_superedge_multiplicity(self, t1: SuperTemplateNode, t2: SuperTemplateNode, channel: str) -> int:
-		""" Returns whether two SuperTemplateNode has an edge in a specific channel in the template graph
-		O(1) """
-		return self.tmplt_graph.ch_to_adj[channel][t1.get_root(), t2.get_root()]
-
-	def get_supernodes_count(self):
-		"""Return the total number of super nodes in the candidate structure.
-		Should be the same as the number of equivalent classes """
-		return len(self.supernodes)
-
-	def get_template_nodes_count(self):
-		"""Return the total number of template node.
-		Should be the same as the size of the union of all nodes in the supernodes"""
-		return self.tmplt_graph.n_nodes
-
-	def get_candidates(self, sn: SuperTemplateNode) -> iter:
+	def get_candidates(self, sn: SuperTemplateNode) -> [Supernode]:
 		""" Returns an iterator of candidates of a given supernode
 		Iterates through subsets of nodes for supernodes rather than permutations
 		Yields singleton for trivial supernodes """
 		# IMPORTANT: must use yield for iterator.... can be complicated wrt storage
+		# TODO: Equivalent classes in world nodes
 		if sn.is_trivial():
-			cand_list = self._get_cand_list(sn)
-		else:
-			cand_list = self.non_triv_candidates[sn]
-		for n in cand_list:
-			yield Supernode(n)
-
-	def get_candidates_count(self, supernode: SuperTemplateNode) -> int:
-		""" Returns the number of candidates that supernode has"""
-		return int(np.sum(self.candidates_array[supernode.get_root()]))
-
-	def get_cand_count(self) -> np.ndarray:
-		""" Returns an array where each index specify the number of candidates
-		This is just for individual node and not taken into account equiv classes"""
-		return np.sum(self.candidates_array, axis=1)
-
-	def get_supernodes_cand_count(self) -> {SuperTemplateNode: int}:
-		""" Returns a dictionary of supernodes and their candidate counts
-		This time we take into account of subsets and such"""
-		return {sn: self.get_candidates_count(sn) for sn in self.supernodes.values()}
+			for n in self._get_cand_list(sn):  # n is a string
+				n = [n]
+				idxs = self.get_vertices_from_names(n)
+				yield Supernode(idxs, name=n)
+		else:  # n is not trivial
+			for n in self.get_candidate_combination(sn):  # n is a tuple
+				idxs = self.get_vertices_from_names(n)
+				yield Supernode(idxs, name=list(n))
 
 	def supernode_clique_and_cand_node_clique(self, supernode: SuperTemplateNode, cand_node: Supernode) -> bool:
 		""" Returns a bool specifying if the given cand_node satisfy the clique condition of supernode:
@@ -200,7 +228,8 @@ class CandidateStructure(object):
 				supernode_submatrix = self._get_submatrix(
 					self.tmplt_graph.ch_to_adj[ch].A, supernode.get_vertices())
 				candidate_node_submatrix = self._get_submatrix(
-					self.world_graph.ch_to_adj[ch].A, cand_node.get_vertices())
+					self.world_graph.ch_to_adj[ch].A,
+					self.get_vertices_from_names(cand_node.name))
 				if not np.all(candidate_node_submatrix >= supernode_submatrix):
 					# if our world graph does not contain a similar clique in that channel
 					return False
@@ -210,9 +239,36 @@ class CandidateStructure(object):
 		""" Returns a bool indicating with the current
 		candidate structure, a solution is possible.
 		Just check if any cand_count = 0. This is called ideally after filtering"""
-		return not np.any(self.get_cand_count() == 0)  # returns False if any cand is 0
+		return np.all(self.get_cand_count() >= self.equiv_size_array)  # returns False if any cand is 0
 
 	# ===== helper ======
+	def get_vertices_from_names(self, name_list: [str]) -> [int]:
+		""" Returns the correct indices in the world graph given the name of world nodes"""
+		if type(name_list[0]) is tuple:
+			toreturn = [self.world_graph.node_idxs[j] for j in name_list]
+		else:
+			toreturn = [self.world_graph.node_idxs[i] for i in name_list]
+		return toreturn
+
+	def get_vertices_from_names_t(self, name_list: [str]) -> [int]:
+		""" Returns the correct indices in the world graph given the name of world nodes"""
+		return [self.tmplt_graph.node_idxs[i] for i in name_list]
+
+	def get_names_from_vertices(self, vertices: [int]) -> [str]:
+		""" Return the name of the given indices... have to be careful"""
+		if type(vertices) is int:
+			return [self.world_graph.nodes[vertices]]
+		return [self.world_graph.nodes[i] for i in vertices]
+
+	def _get_cand_list(self, sn: SuperTemplateNode) -> [str]:
+		""" Return the names of the candidates of sn"""
+		idxs = [int(i[0]) for i in np.argwhere(self.candidates_array[sn.get_root()])]
+		return self.get_names_from_vertices(idxs)
+
+	def get_cand_list_idxs(self, sn: SuperTemplateNode) -> [int]:
+		""" Returns the idxs of the world nodes' candidates of sn"""
+		return [int(i[0]) for i in np.argwhere(self.candidates_array[sn.get_root()])]
+
 	def in_same_equiv_class(self, t1: int, t2: int) -> bool:
 		""" Given two template nodes, return a bool specifying whether they
 		are in the same supernode or not i.e. same equivalent class """
@@ -232,6 +288,37 @@ class CandidateStructure(object):
 			result[ch] = adj[first, second]  # 0 if not clique and number of edges otherwise
 		return result
 
+	def candidate_equivalence(self, x1, x2, u: SuperTemplateNode) -> bool:
+		""" Returns if x1 ~ x2 according to candidate equivalence
+		x1 and x2 are idxs of candidates of sn"""
+		for ch in self.channels:  # for each channel, get the world graph
+			world_graph = self.world_graph.ch_to_adj[ch].A
+			for v in self.get_incoming_neighbors(u, ch):
+				mvu = self.get_superedge_multiplicity(v, u, ch)  # multiplicity of ([v],[u]) in channel ch
+				# compute the boolean matrix of cand_edge between x_n and cand of v
+				# print_debug((self.get_cand_list_idxs(v), x1))
+				x1nbr = world_graph[np.ix_(self.get_cand_list_idxs(v), [x1])] >= mvu
+				x2nbr = world_graph[np.ix_(self.get_cand_list_idxs(v), [x2])] >= mvu
+				if not np.all(x1nbr == x2nbr):  # this makes sure same incoming neighbors
+					return False
+			for v in self.get_outgoing_neighbors(u, ch):
+				muv = self.get_superedge_multiplicity(u, v, ch)  # multiplicity of ([u],[v]) in channel ch
+				# compute the boolean matrix of cand_edge between x_n and cand of v
+				x1nbr = world_graph[np.ix_([x1], self.get_cand_list_idxs(v))] >= muv
+				x2nbr = world_graph[np.ix_([x2], self.get_cand_list_idxs(v))] >= muv
+				if not np.all(x1nbr == x2nbr):  # this makes sure same outgoing neighbors
+					return False
+		return True
+
+	def get_candidates_of_unmatched_supernodes(
+			self, matched_supernodes: {SuperTemplateNode}, curr_node: SuperTemplateNode) -> {int}:
+		""" Returns a bool indicating whether equiv_cand has any overlapping"""
+		big_cand = set()
+		for sn in self.supernodes.values():
+			if sn not in matched_supernodes and sn is not curr_node:
+				big_cand.update(self.get_cand_list_idxs(sn))
+		return big_cand
+
 	@staticmethod
 	def _get_submatrix(matrix: np.ndarray, idx: [int]) -> np.ndarray:
 		""" Given a matrix and a list of coordinates, return the submatrix corresponding
@@ -247,9 +334,57 @@ class CandidateStructure(object):
 		idx = self.tmplt_graph.node_idxs[name]
 		return self.get_supernode_by_idx(idx)
 
-	def _get_cand_list(self, sn: SuperTemplateNode) -> [int]:
-		""" Return the indices of the candidates of sn"""
-		return list(i[0] for i in np.argwhere(self.candidates_array[sn.get_root()]))
-
 	def __str__(self):
 		return str(self.equiv_classes)  # for now
+
+	def get_cand_node_from_idxs(self, idxs: [int]) -> Supernode:
+		return Supernode(idxs, self.get_names_from_vertices(idxs))
+
+	# === NUMBER QUERIES ====
+	def get_superedge_multiplicity(self, t1: SuperTemplateNode, t2: SuperTemplateNode, channel: str) -> int:
+		""" Returns whether two SuperTemplateNode has an edge in a specific channel in the template graph
+		O(1) """
+		return self.tmplt_graph.ch_to_adj[channel][t1.get_root(), t2.get_root()]
+
+	def get_supernodes_count(self):
+		"""Return the total number of super nodes in the candidate structure.
+		Should be the same as the number of equivalent classes """
+		return len(self.supernodes)
+
+	def get_template_nodes_count(self):
+		"""Return the total number of template node.
+		Should be the same as the size of the union of all nodes in the supernodes"""
+		return self.tmplt_graph.n_nodes
+
+	def get_candidates_count(self, supernode: SuperTemplateNode) -> int:
+		""" Returns the number of candidates that supernode has"""
+		return int(np.sum(self.candidates_array[supernode.get_root()]))
+
+	def get_degree(self, supernode: SuperTemplateNode) -> int:
+		""" Returns the degree (in+out) of a supernode"""
+		return int(np.sum(self.tmplt_graph.sym_composite_adj[supernode.get_root()], axis=1))
+
+	def get_nbr_count(self, supernode: SuperTemplateNode):
+		""" Returns the number of neighbors of a supernode"""
+		return int(np.sum(self.tmplt_graph.is_nbr[supernode.get_root()], axis=1))
+
+	def get_cand_count(self) -> np.ndarray:
+		""" Returns an array where each index specify the number of candidates
+		This is just for individual node and not taken into account equiv classes"""
+		return np.sum(self.candidates_array, axis=1)
+
+	def get_supernodes_cand_count(self) -> {SuperTemplateNode: int}:
+		""" Returns a dictionary of supernodes and their candidate counts
+		This time we take into account of subsets and such"""
+		result = {}
+		for sn in self.supernodes.values():
+			result[sn] = comb(self.get_candidates_count(sn), len(sn))
+		return result
+
+	def get_supernodes_degrees(self) -> {SuperTemplateNode: int}:
+		""" Returns a dictionary of supernodes and degree """
+		return {sn: self.get_degree(sn) for sn in self.supernodes.values()}
+
+	def get_supernodes_nbr_count(self) -> {SuperTemplateNode: int}:
+		""" Returns a dictionary of supernodes and their neighbor counts"""
+		return {sn: self.get_nbr_count(sn) for sn in self.supernodes.values()}

@@ -8,6 +8,7 @@ from functools import reduce
 def recursive_alldiff_counter(node_to_nodes_list, nodes_to_cand_counts):
     # no nodes left to assign
     if len(node_to_nodes_list) == 0:
+        # print("FOUND ISO")
         return 1
 
     count = 0
@@ -30,7 +31,6 @@ def recursive_alldiff_counter(node_to_nodes_list, nodes_to_cand_counts):
             node_to_nodes_list, nodes_to_cand_counts)
 
         count += n_cands * n_ways_to_assign_rest
-
         # put the count back so we don't mess up the recursion
         nodes_to_cand_counts[nodes] += 1
 

@@ -8,19 +8,20 @@ from functools import reduce
 # TODO: count how many isomorphisms each background node participates in.
 # TODO: switch from recursive to iterative implementation for readability
 
+
 def recursive_isomorphism_counter(tmplt, world, candidates, *,
                                   unspec_cover, verbose, init_changed_cands):
     # If the node cover is empty, the unspec nodes are disconnected. Thus, we
     # can skip straight to counting solutions to the alldiff constraint problem
     if len(unspec_cover) == 0:
         # Elimination filter is not needed here and would be a waste of time
-        run_filters(tmplt, world, candidates=candidates, filters=cheap_filters,
+        _, world, candidates = run_filters(tmplt, world, candidates=candidates, filters=cheap_filters,
                     verbose=False, init_changed_cands=init_changed_cands)
         node_to_cands = {node: world.nodes[candidates[idx]]
                          for idx, node in enumerate(tmplt.nodes)}
         return count_alldiffs(node_to_cands)
 
-    run_filters(tmplt, world, candidates=candidates, filters=all_filters,
+    _, world, candidates = run_filters(tmplt, world, candidates=candidates, filters=cheap_filters,
                 verbose=False, init_changed_cands=init_changed_cands)
 
     # Since the node cover is not empty, we first choose some valid
@@ -63,7 +64,7 @@ def count_isomorphisms(tmplt, world, *, candidates=None, verbose=True):
 
     unspec_nodes = np.where(candidates.sum(axis=1) > 1)[0]
     unspec_cover = get_node_cover(tmplt.subgraph(unspec_nodes))
-
+    print(unspec_cover)
     # Send zeros to init_changed_cands since we already just ran the filters
     return recursive_isomorphism_counter(
         tmplt, world, candidates, verbose=verbose, unspec_cover=unspec_cover,
