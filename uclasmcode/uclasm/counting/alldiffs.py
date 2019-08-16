@@ -76,9 +76,4 @@ def count_alldiffs(node_to_cands):
         node: [nodes for nodes in nodes_to_cand_counts.keys() if node in nodes]
         for node in node_to_cands}
 
-    for k, v in nodes_to_cands.items():
-        print(k, v)
-    for k, v in node_to_nodes_list.items():
-        print(k, v)
-
     return recursive_alldiff_counter(node_to_nodes_list, nodes_to_cand_counts)
